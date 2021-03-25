@@ -92,7 +92,8 @@ export default {
         });
         this.$store.commit("user/AlterUser", data);
         this.Loading = false;
-        this.$router.push("/main");
+        localStorage.id = data.id_paciente
+        this.$router.push({path: "/main"});
       } catch (error) {
         this.OpenAlertDialog(
           "bottom",

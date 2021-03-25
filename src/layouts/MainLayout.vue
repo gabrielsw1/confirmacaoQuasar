@@ -4,7 +4,7 @@
       <q-toolbar class="bg-grey-3">
         <q-btn flat dense round icon="menu" color="blue" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
         <q-toolbar-title >
-          <b class="text-blue"> MV</b><span class="text-black" @click="$router.push('/main')">Hospidata </span>
+          <b class="text-blue"> MV</b><span class="text-black" @click="$router.push('/main')"> Hospidata </span>
         </q-toolbar-title>
         <q-btn flat round dense icon="power_settings_new" color="blue" @click="logout"/>
       </q-toolbar>
@@ -32,7 +32,7 @@
       title: "Agendamentos",
       caption: "Agendamentos não confirmados",
       icon: "event",
-      to: "/StepperAppointments"
+      to: '/StepperAppointments'
     },
     {
       title: "Histórico de Agendamentos",

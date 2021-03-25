@@ -16,7 +16,7 @@
               <div class="row">
                 <div class="col-auto q-mr-xs">
                   <b>Proc.:</b> {{ appointment.descrProcedimento }}
-                  {{ appointment.idAgendamento }}
+                  {{ appointment.idAgendamento }} 
                 </div>
                 <div class="col-auto q-mr-xs" v-if="appointment.dtAgendamento">
                   <b>Data:</b> {{ appointment.dtAgendamento }}
@@ -220,7 +220,7 @@ export default {
         this.CommitAppointmentLoading(true);
         this.Appointments = [];
         const { data } = await this.$axios.get(
-          `/agendamentos/consultaAgendamentos/${this.$store.state.user.user.id_paciente}`
+          `/agendamentos/consultaAgendamentos/${localStorage.id}`
         );
         this.Appointments = [...data];
         this.CommitAppointmentLoading(false);
