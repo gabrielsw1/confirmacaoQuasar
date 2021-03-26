@@ -22,22 +22,22 @@ router.get('/perfil/:id', (req, res) => {
                 sigh.pacientes p
             where
                 p.id_paciente = ${req.params.id}
-            `
+        `
       )
       let Endereco = await client.query(
         `
             select
-                en.numero
-                , en.complemento
-                , en.referencia
-                , en.cod_tp_endereco
-                , l.tp_logradouro
-                , l.uf
-                , l.municipio
-                , l.bairro_inicial
-                , l.bairro_final
-                , l.logradouro
-                , l.cep
+                en.numero as "numero"
+                , en.complemento as "complemento"
+                , en.referencia as "referencia"
+                , en.cod_tp_endereco as "codTpEndereco"
+                , l.tp_logradouro as "tpLogradouro"
+                , l.uf as "uf"
+                , l.municipio as "municipio"
+                , l.bairro_inicial as "bairroInicial"
+                , l.bairro_final as "bairroFinal"
+                , l.logradouro as "logradouro"
+                , l.cep as "cep"
             from
                 sigh.enderecos en
                 inner join endereco_sigh.logradouros l on
@@ -46,7 +46,7 @@ router.get('/perfil/:id', (req, res) => {
                 en.ativo
                 and l.ativo 
                 and cod_paciente = ${req.params.id}
-            `
+        `
       )
 
       let Documentos = await client.query(
@@ -65,7 +65,7 @@ router.get('/perfil/:id', (req, res) => {
                 dp.ativo
                 and dp.numero_documento is not null
                 and dp.cod_paciente = ${req.params.id}
-                `
+        `
       )
 
       const retorno = {
@@ -79,7 +79,6 @@ router.get('/perfil/:id', (req, res) => {
       client.release()
     }
   })().catch(e => {
-    console.log(e)
     res.status(400).json(e)
   })
 })

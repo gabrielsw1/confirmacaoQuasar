@@ -3,10 +3,12 @@
     <q-header elevated>
       <q-toolbar class="bg-grey-3">
         <q-btn flat dense round icon="menu" color="blue" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
-        <q-toolbar-title >
-          <b class="text-blue"> MV</b><span class="text-black" @click="$router.push('/main')"> Hospidata </span>
+        <q-toolbar-title>
+          <b class="text-blue"> MV</b><span class="text-black" @click="$router.push('/main')">
+            Hospidata
+          </span>
         </q-toolbar-title>
-        <q-btn flat round dense icon="power_settings_new" color="blue" @click="logout"/>
+        <q-btn flat round dense icon="power_settings_new" color="blue" @click="logout" />
       </q-toolbar>
     </q-header>
     <q-drawer v-model="leftDrawerOpen" overlay bordered content-class="bg-grey-1">
@@ -21,6 +23,9 @@
     </q-drawer>
     <q-page-container>
       <router-view />
+      <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
+        <q-btn fab icon="keyboard_arrow_up" color="primary" />
+      </q-page-scroller>
     </q-page-container>
   </q-layout>
 </template>
@@ -32,7 +37,7 @@
       title: "Agendamentos",
       caption: "Agendamentos não confirmados",
       icon: "event",
-      to: '/StepperAppointments'
+      to: "/StepperAppointments"
     },
     {
       title: "Histórico de Agendamentos",
@@ -65,9 +70,9 @@
         essentialLinks: linksData
       };
     },
-    methods:{
-      logout(){
-        this.$router.push('/')
+    methods: {
+      logout() {
+        this.$router.push("/");
       }
     }
   };
