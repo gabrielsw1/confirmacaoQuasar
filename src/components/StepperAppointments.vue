@@ -1,6 +1,6 @@
 <template>
-  <div class="q-pa-md">
-    <q-stepper v-model="step" vertical color="primary" animated>
+  <div class="no-padding">
+    <q-stepper v-model="step" vertical color="primary" animated class="no-padding">
       <q-step :name="1" title="Selecione o Agendamento" :done="step > 1">
         <PendingAppointments />
 

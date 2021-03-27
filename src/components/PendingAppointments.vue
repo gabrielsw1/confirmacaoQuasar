@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="no-padding">
     <div class="row">
       <div v-if="PendingAppointments.length == 0">
         Nenhum agendamento localizado

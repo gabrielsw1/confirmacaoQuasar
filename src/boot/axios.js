@@ -3,7 +3,7 @@ import axios from 'axios'
 
 
 const config = axios.create({
-    baseURL: 'http://192.168.232.113:8587/'
+    baseURL: 'https://cliente.hospidata.com.br/globalhealth/'
 })
 
 Vue.prototype.$axios = config
