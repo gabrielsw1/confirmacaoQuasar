@@ -27,7 +27,8 @@ router.get('/perfil/:id', (req, res) => {
       let Endereco = await client.query(
         `
             select
-                en.numero as "numero"
+                  id_endereco as "id"
+                , en.numero as "numero"
                 , en.complemento as "complemento"
                 , en.referencia as "referencia"
                 , en.cod_tp_endereco as "codTpEndereco"
@@ -83,4 +84,26 @@ router.get('/perfil/:id', (req, res) => {
   })
 })
 
+
+router.delete('/endereco/:id',(req,res)=>{
+  (async () => {
+    const client = await db.pool.connect()
+    try {
+       await client.query(
+        `
+           update
+                sigh.enderecos en
+            set ativo = false
+            where = ${req.params.id}
+        `
+      )
+
+      res.status(200).json(retorno)
+    } finally {
+      client.release()
+    }
+  })().catch(e => {
+    res.status(400).json(e)
+  })
+})
 module.exports = router
