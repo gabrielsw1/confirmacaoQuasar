@@ -61,7 +61,8 @@
                     Editar
                   </q-tooltip>
                 </q-btn>
-                <q-btn color="negative" icon="delete" class="col-2 col-sm-1 q-mr-xs q-mb-xs" :disable="Disabled">
+                <q-btn color="negative" icon="delete" class="col-2 col-sm-1 q-mr-xs q-mb-xs" :disable="Disabled"
+                  @click="DeleteEnd(selected[0])">
                   <q-tooltip>
                     Excluir
                   </q-tooltip>
@@ -107,26 +108,27 @@
         <q-card-section>
           <div class="row q-col-gutter-sm" style="width:100%">
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="CEP" mask="#####-##" @blur="CepVerify">
+              <q-input outlined standout="bg-blue text-white" dense label="CEP" mask="#####-###" v-model="newEnd.cep"
+                @blur="CepVerify">
                 <template v-slot:prepend>
                   <q-icon name="search" />
                 </template>
               </q-input>
             </div>
             <div class="col-12 col-sm-6">
-              <q-input outlined standout="bg-blue text-white" dense label="Logradouro" />
+              <q-input outlined standout="bg-blue text-white" dense label="Logradouro" v-model="newEnd.logradouro" />
             </div>
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="Numero" />
+              <q-input outlined standout="bg-blue text-white" dense label="Numero" v-model="newEnd.numero" />
             </div>
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="Municipio" />
+              <q-input outlined standout="bg-blue text-white" dense label="Municipio" v-model="newEnd.municipio" />
             </div>
             <div class="col-12 col-sm-6">
-              <q-input outlined standout="bg-blue text-white" dense label="Complemento" />
+              <q-input outlined standout="bg-blue text-white" dense label="Complemento" v-model="newEnd.complemento" />
             </div>
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="Referencia" />
+              <q-input outlined standout="bg-blue text-white" dense label="Referencia" v-model="newEnd.referencia" />
             </div>
           </div>
         </q-card-section>
@@ -147,6 +149,18 @@
         loading: false,
         selected: [],
         paciente: {},
+        newEnd: {
+          id: null,
+          cep: null,
+          uf: null,
+          municipio: null,
+          tipo: null,
+          logradouro: null,
+          numero: null,
+          complemento: null,
+          referencia: null,
+          bairro: null,
+        },
         columns: [{
             label: "CEP",
             name: "CEP",
@@ -247,9 +261,41 @@
           console.log(error);
         }
       },
+      async DeleteEnd({
+        id
+      }) {
+        try {
+          await this.$axios.delete(
+            `pacientes/endereco/${id}`)
+          this.selected = []
+          this.findPersonalData();
+        } catch (error) {
+          console.log(error)
+        }
+      },
       IncludeEnd() {
         this.show = true
         console.log(...this.selected)
+      },
+      async CepVerify() {
+        try {
+          const {
+            data
+          } = await this.$axios.get(`/correios/consultaCEP/${this.newEnd.cep}`)
+
+          const endereco = data.return.end.split(' ')
+          endereco.splice(0, 1)
+
+          this.newEnd.bairro = data.return.bairro
+          this.newEnd.cidade = data.return.cidade
+          this.newEnd.complemento = data.return.complemento2
+          this.newEnd.logradouro = endereco.join(' ')
+          this.newEnd.tipo = data.return.end.split(' ')[0]
+          this.newEnd.uf = data.return.uf
+          
+        } catch (error) {
+          console.log(error)
+        }
       },
       CpfVerify() {
         let Soma;
@@ -271,17 +317,15 @@
         if (Resto != parseInt(this.cpf.substring(10, 11))) false;
         return true;
       },
-      CepVerify(){
-        console.log('entrou na funcao')
-      }
 
     }
   };
 
 </script>
 <style scoped>
-.my-card {
-  width: 100%;
-  min-width: 50%;
-}
+  .my-card {
+    width: 100%;
+    min-width: 50%;
+  }
+
 </style>
