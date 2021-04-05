@@ -85,25 +85,103 @@ router.get('/perfil/:id', (req, res) => {
 })
 
 
-router.delete('/endereco/:id',(req,res)=>{
+router.delete('/endereco/:id', (req, res) => {
   (async () => {
     const client = await db.pool.connect()
     try {
-       await client.query(
+      await client.query(
         `
            update
                 sigh.enderecos en
             set ativo = false
-            where = ${req.params.id}
+            where id_endereco = ${req.params.id}
         `
       )
 
-      res.status(200).json(retorno)
+      res.status(200).json('OK')
     } finally {
       client.release()
     }
   })().catch(e => {
+    console.log(e)
     res.status(400).json(e)
   })
 })
+
+
+router.post('/endereco/:id/', (req, res) => {
+  (async () => {
+
+    let idLogradouro;
+    const client = await db.pool.connect()
+    try {
+      const cep = await client.query(`select * from endereco_sigh.logradouros where cep  = '${req.body.cep.split('-').join('')}' limit 1`)
+      if (cep.rows.length === 0) {
+        const id = await client.query(
+          `insert 
+            into 
+              endereco_sigh.logradouros (
+                uf
+                , municipio
+                , bairro_inicial
+                , bairro_final
+                , tp_logradouro
+                , logradouro
+                , cep
+                , ativo)
+          values(
+                UPPER(${req.body.uf})
+                , UPPER(${req.body.municipio})
+                , UPPER(${req.body.bairro})
+                , UPPER(${req.body.bairro})
+                , UPPER(${req.body.tipo})
+                , UPPER(${req.body.logradouro})
+                , '${req.body.cep.split('-').join('')}'
+                , true) RETURNING id_logradouro `
+        )
+        idLogradouro = id.rows[0].id_logradouro
+      } else {
+        idLogradouro = cep.rows[0].id_logradouro
+      }
+
+      if (req.body.id) {
+        console.log('vou alterar')
+      } else {
+        await client.query(
+          `insert
+              into
+                sigh.enderecos(
+                  cod_logradouro
+                  , cod_paciente
+                  , numero
+                  , complemento
+                  , referencia
+                  , pais
+                  , cod_tp_endereco
+                  , ativo
+                )
+            values(
+                  ${idLogradouro},
+                  ${req.params.id},
+                  ${req.body.numero},
+                  ${req.body.complemento},
+                  ${req.body.referencia},
+                  'BRASIL',
+                  ${req.body.referencia},     /* alterar para tipo de logradouro */
+                  true
+            )
+              `
+          )
+      }
+      res.status(200).json('teste')
+    } finally {
+      client.release()
+    }
+  })().catch(e => {
+    console.log(e)
+    res.status(400).json(e)
+  })
+})
+
+
 module.exports = router

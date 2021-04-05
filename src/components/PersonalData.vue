@@ -36,12 +36,10 @@
           <q-input outlined standout="bg-blue text-white" dense label="Pai" v-model="PacienteData.nmPai" />
         </div>
         <div class="col-12">
-
           <!--Inicio da tabela de endereco -->
           <q-table title="Endereços" :data="data" :columns="columns" :selected.sync="selected" :grid="$q.screen.lt.sm"
             selection="single" row-key="cep" :loading="loading" color="primary" no-data-label="Nenhum dado encontrado"
             dense>
-
             <!--Titulo e botoes de acoes de CRUD -->
             <template v-slot:top>
               <div class="row">
@@ -56,7 +54,8 @@
                     Incluir
                   </q-tooltip>
                 </q-btn>
-                <q-btn color="orange-10" icon="mode_edit" class="col-2 col-sm-1 q-mr-xs q-mb-xs" :disable="Disabled">
+                <q-btn color="orange-10" icon="mode_edit" class="col-2 col-sm-1 q-mr-xs q-mb-xs" :disable="Disabled"
+                  @click="EditEnd">
                   <q-tooltip>
                     Editar
                   </q-tooltip>
@@ -80,7 +79,9 @@
                   </q-card-section>
                   <q-separator />
                   <q-list dense>
-                    <q-item v-for="col in props.cols.filter(col => col.name !== 'desc')" :key="col.name">
+                    <q-item v-for="col in props.cols.filter(
+                        col => col.name !== 'desc'
+                      )" :key="col.name">
                       <q-item-section>
                         <q-item-label>{{ col.label }}:</q-item-label>
                       </q-item-section>
@@ -92,8 +93,6 @@
                 </q-card>
               </div>
             </template>
-
-
           </q-table>
         </div>
       </div>
@@ -109,20 +108,22 @@
           <div class="row q-col-gutter-sm" style="width:100%">
             <div class="col-12 col-sm-3">
               <q-input outlined standout="bg-blue text-white" dense label="CEP" mask="#####-###" v-model="newEnd.cep"
-                @blur="CepVerify">
+                :loading="loadingCep" :rules="[val => !!val || 'CEP Obrigatório']" @blur="CepVerify">
                 <template v-slot:prepend>
                   <q-icon name="search" />
                 </template>
               </q-input>
             </div>
             <div class="col-12 col-sm-6">
-              <q-input outlined standout="bg-blue text-white" dense label="Logradouro" v-model="newEnd.logradouro" />
+              <q-input outlined standout="bg-blue text-white" dense label="Logradouro" disable
+                v-model="newEnd.logradouro" />
             </div>
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="Numero" v-model="newEnd.numero" />
+              <q-input outlined standout="bg-blue text-white" dense label="Número" v-model="newEnd.numero" />
             </div>
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="Municipio" v-model="newEnd.municipio" />
+              <q-input outlined standout="bg-blue text-white" dense label="Município" disable
+                v-model="newEnd.municipio" />
             </div>
             <div class="col-12 col-sm-6">
               <q-input outlined standout="bg-blue text-white" dense label="Complemento" v-model="newEnd.complemento" />
@@ -134,7 +135,7 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn flat label="Salvar" color="primary" v-close-popup />
+          <q-btn label="Salvar" color="primary" v-close-popup @click="SaveEnd" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -144,22 +145,24 @@
   export default {
     data() {
       return {
+        mode: '',
         cpf: null,
         show: false,
         loading: false,
+        loadingCep: false,
         selected: [],
         paciente: {},
         newEnd: {
           id: null,
           cep: null,
-          uf: null,
-          municipio: null,
-          tipo: null,
-          logradouro: null,
-          numero: null,
-          complemento: null,
-          referencia: null,
-          bairro: null,
+          uf: '',
+          municipio: '',
+          tipo: '',
+          logradouro: '',
+          numero: '',
+          complemento: '',
+          referencia: '',
+          bairro: ''
         },
         columns: [{
             label: "CEP",
@@ -237,26 +240,36 @@
       },
       Disabled() {
         if (this.selected.length > 0) {
-          return false
+          return false;
         }
-        return true
-      },
+        return true;
+      }
     },
     mounted() {
       this.findPersonalData();
     },
     methods: {
+      ResetEnd(){
+        this.newEnd.id = null
+        this.newEnd.cep = null
+        this.newEnd.bairro = ''
+        this.newEnd.municipio = ''
+        this.newEnd.complemento = ''
+        this.newEnd.logradouro = ''
+        this.newEnd.tipo = ''
+        this.newEnd.numero = ''
+        this.newEnd.referencia = ''
+        this.newEnd.uf = ''
+      },
       async findPersonalData() {
         try {
-          this.loading = true
+          this.loading = true;
           const {
             data
-          } = await this.$axios.get(
-            `/pacientes/perfil/${localStorage.id}`
-          );
+          } = await this.$axios.get(`/pacientes/perfil/${localStorage.id}`);
           this.values = data.Endereco;
           this.paciente = data;
-          this.loading = false
+          this.loading = false;
         } catch (error) {
           console.log(error);
         }
@@ -265,36 +278,61 @@
         id
       }) {
         try {
-          await this.$axios.delete(
-            `pacientes/endereco/${id}`)
-          this.selected = []
+          await this.$axios.delete(`pacientes/endereco/${id}`);
+          this.selected = [];
           this.findPersonalData();
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      IncludeEnd() {
+        this.ResetEnd()
+        this.show = true;
+      },
+      EditEnd() {
+        this.show = true
+        this.newEnd.cep = this.selected[0].cep
+        this.newEnd.id = this.selected[0].id
+        this.newEnd.bairro = this.selected[0].bairroInicial;
+        this.newEnd.municipio = this.selected[0].municipio;
+        this.newEnd.complemento = this.selected[0].complemento;
+        this.newEnd.logradouro = this.selected[0].logradouro;
+        this.newEnd.tipo = this.selected[0].tpLogradouro;
+        this.newEnd.numero = this.selected[0].numero;
+        this.newEnd.referencia = this.selected[0].referencia;
+        this.newEnd.uf = this.selected[0].uf;
+      },
+      async SaveEnd() {
+        try {
+          await this.$axios.post(`/pacientes/endereco/${localStorage.id}`, this.newEnd)
         } catch (error) {
           console.log(error)
         }
       },
-      IncludeEnd() {
-        this.show = true
-        console.log(...this.selected)
-      },
       async CepVerify() {
+        if (!this.newEnd.cep) {
+          return;
+        }
+        this.loadingCep = true;
         try {
           const {
             data
-          } = await this.$axios.get(`/correios/consultaCEP/${this.newEnd.cep}`)
+          } = await this.$axios.get(
+            `/correios/consultaCEP/${this.newEnd.cep}`
+          );
 
-          const endereco = data.return.end.split(' ')
-          endereco.splice(0, 1)
-
-          this.newEnd.bairro = data.return.bairro
-          this.newEnd.cidade = data.return.cidade
-          this.newEnd.complemento = data.return.complemento2
-          this.newEnd.logradouro = endereco.join(' ')
-          this.newEnd.tipo = data.return.end.split(' ')[0]
-          this.newEnd.uf = data.return.uf
-          
+          const endereco = data.return.end.split(" ");
+          endereco.splice(0, 1);
+          this.newEnd.bairro = data.return.bairro;
+          this.newEnd.cidade = data.return.cidade;
+          this.newEnd.complemento = data.return.complemento2;
+          this.newEnd.logradouro = endereco.join(" ");
+          this.newEnd.tipo = data.return.end.split(" ")[0];
+          this.newEnd.uf = data.return.uf;
+          this.newEnd.municipio = data.return.cidade
+          this.loadingCep = false;
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
       },
       CpfVerify() {
@@ -303,21 +341,22 @@
         Soma = 0;
         if (this.cpf == "00000000000") return false;
 
-        for (let i = 1; i <= 9; i++) Soma = Soma + parseInt(this.cpf.substring(i - 1, i)) * (11 - i);
+        for (let i = 1; i <= 9; i++)
+          Soma = Soma + parseInt(this.cpf.substring(i - 1, i)) * (11 - i);
         Resto = (Soma * 10) % 11;
 
-        if ((Resto == 10) || (Resto == 11)) Resto = 0;
+        if (Resto == 10 || Resto == 11) Resto = 0;
         if (Resto != parseInt(this.cpf.substring(9, 10))) return false;
 
         Soma = 0;
-        for (let i = 1; i <= 10; i++) Soma = Soma + parseInt(this.cpf.substring(i - 1, i)) * (12 - i);
+        for (let i = 1; i <= 10; i++)
+          Soma = Soma + parseInt(this.cpf.substring(i - 1, i)) * (12 - i);
         Resto = (Soma * 10) % 11;
 
-        if ((Resto == 10) || (Resto == 11)) Resto = 0;
+        if (Resto == 10 || Resto == 11) Resto = 0;
         if (Resto != parseInt(this.cpf.substring(10, 11))) false;
         return true;
-      },
-
+      }
     }
   };
 
