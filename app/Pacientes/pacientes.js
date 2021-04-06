@@ -116,6 +116,7 @@ router.post('/endereco/:id/', (req, res) => {
     const client = await db.pool.connect()
     try {
       const cep = await client.query(`select * from endereco_sigh.logradouros where cep  = '${req.body.cep.split('-').join('')}' limit 1`)
+      /* Verifica se existe o endereco, caso não exista ele insere*/
       if (cep.rows.length === 0) {
         const id = await client.query(
           `insert 
@@ -141,12 +142,23 @@ router.post('/endereco/:id/', (req, res) => {
         )
         idLogradouro = id.rows[0].id_logradouro
       } else {
+        /* Caso exista atribui o valor para a variavel idLogradouro*/
         idLogradouro = cep.rows[0].id_logradouro
       }
 
+      /* Se existir o id na requisição feita pelo Front o endereço será editado*/
       if (req.body.id) {
-        console.log('vou alterar')
+        await client.query(
+          `
+            update sigh.enderecos
+            set complemento = '${req.body.complemento}' ,
+            numero = ${parseInt(req.body.numero)},
+            referencia = '${req.body.referencia}'
+            where id_endereco = ${req.body.id}
+          `
+          )
       } else {
+        /* Caso não exista o id o sistema irá inserir um novo endereco*/
         await client.query(
           `insert
               into
@@ -157,23 +169,20 @@ router.post('/endereco/:id/', (req, res) => {
                   , complemento
                   , referencia
                   , pais
-                  , cod_tp_endereco
                   , ativo
                 )
             values(
                   ${idLogradouro},
                   ${req.params.id},
-                  ${req.body.numero},
-                  ${req.body.complemento},
-                  ${req.body.referencia},
+                  (cast('${req.body.numero}' as integer)),
+                  '${req.body.complemento}',
+                  '${req.body.referencia}',
                   'BRASIL',
-                  ${req.body.referencia},     /* alterar para tipo de logradouro */
                   true
-            )
-              `
-          )
+            )`
+        )
       }
-      res.status(200).json('teste')
+      res.status(200).json('ok')
     } finally {
       client.release()
     }
