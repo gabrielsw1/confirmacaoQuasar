@@ -10,7 +10,7 @@
           <q-input outlined standout="bg-blue text-white" dense label="Nome Social" v-model="PacienteData.nmSocial" />
         </div>
         <div class="col-12 col-sm-2 ">
-          <q-input outlined standout="bg-blue text-white" dense label="Sexo" />
+          <q-select outlined standout="bg-blue text-white" dense label="Sexo" :options="options" />
         </div>
         <div class="col-12 col-sm-2 ">
           <q-input outlined standout="bg-blue text-white" dense label="CPF" v-model="cpf" mask="###.###.###-##"
@@ -38,7 +38,7 @@
         <div class="col-12">
           <!--Inicio da tabela de endereco -->
           <q-table title="Endereços" :data="data" :columns="columns" :selected.sync="selected" :grid="$q.screen.lt.sm"
-            selection="single" row-key="cep" :loading="loading" color="primary" no-data-label="Nenhum dado encontrado"
+            selection="single" row-key="id" :loading="loading" color="primary" no-data-label="Nenhum dado encontrado"
             dense>
             <!--Titulo e botoes de acoes de CRUD -->
             <template v-slot:top>
@@ -108,7 +108,8 @@
           <div class="row q-col-gutter-sm" style="width:100%">
             <div class="col-12 col-sm-3">
               <q-input outlined standout="bg-blue text-white" dense label="CEP" mask="#####-###" v-model="newEnd.cep"
-                :loading="loadingCep" :rules="[val => !!val || 'CEP Obrigatório']" @blur="CepVerify">
+                :loading="loadingCep" :rules="[val => !!val || 'CEP Obrigatório']" :disable="disableCEP"
+                @blur="CepVerify">
                 <template v-slot:prepend>
                   <q-icon name="search" />
                 </template>
@@ -119,7 +120,8 @@
                 v-model="newEnd.logradouro" />
             </div>
             <div class="col-12 col-sm-3">
-              <q-input outlined standout="bg-blue text-white" dense label="Número" v-model="newEnd.numero" />
+              <q-input outlined standout="bg-blue text-white" dense label="Número"
+                :rules="[val => !!val || 'Número Obrigatório']" v-model="newEnd.numero" />
             </div>
             <div class="col-12 col-sm-3">
               <q-input outlined standout="bg-blue text-white" dense label="Município" disable
@@ -135,7 +137,7 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn label="Salvar" color="primary" v-close-popup @click="SaveEnd" />
+          <q-btn label="Salvar" color="primary" v-close-popup :disable="DisalbedSaveButton" @click="SaveEnd" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -145,7 +147,7 @@
   export default {
     data() {
       return {
-        mode: '',
+        disableCEP: false,
         cpf: null,
         show: false,
         loading: false,
@@ -155,15 +157,28 @@
         newEnd: {
           id: null,
           cep: null,
-          uf: '',
-          municipio: '',
-          tipo: '',
-          logradouro: '',
-          numero: '',
-          complemento: '',
-          referencia: '',
-          bairro: ''
+          uf: "",
+          municipio: "",
+          tipo: "",
+          logradouro: "",
+          numero: "",
+          complemento: "",
+          referencia: "",
+          bairro: ""
         },
+        options: [{
+            label: "Masculino",
+            value: "1"
+          },
+          {
+            label: "Feminino",
+            value: "2"
+          },
+          {
+            label: "Não Informado",
+            value: "5"
+          }
+        ],
         columns: [{
             label: "CEP",
             name: "CEP",
@@ -224,7 +239,7 @@
             label: "Bairro",
             name: "Bairro",
             align: "left",
-            field: "bairro_inicial",
+            field: "bairroInicial",
             sortable: true
           }
         ],
@@ -243,30 +258,41 @@
           return false;
         }
         return true;
+      },
+      DisalbedSaveButton() {
+        if (!this.newEnd.cep || !this.newEnd.numero) {
+          return true;
+        }
+        return false;
       }
     },
     mounted() {
       this.findPersonalData();
     },
     methods: {
-      ResetEnd(){
-        this.newEnd.id = null
-        this.newEnd.cep = null
-        this.newEnd.bairro = ''
-        this.newEnd.municipio = ''
-        this.newEnd.complemento = ''
-        this.newEnd.logradouro = ''
-        this.newEnd.tipo = ''
-        this.newEnd.numero = ''
-        this.newEnd.referencia = ''
-        this.newEnd.uf = ''
+      /* função que reseta os campos dos endereços, usada na inclusão para não pegar sujeira da edição */
+      ResetEnd() {
+        this.newEnd.id = null;
+        this.newEnd.cep = null;
+        this.newEnd.bairro = "";
+        this.newEnd.municipio = "";
+        this.newEnd.complemento = "";
+        this.newEnd.logradouro = "";
+        this.newEnd.tipo = "";
+        this.newEnd.numero = "";
+        this.newEnd.referencia = "";
+        this.newEnd.uf = "";
       },
+
+      /* Função que busca todos os dados dos pacientes */
       async findPersonalData() {
         try {
           this.loading = true;
           const {
             data
-          } = await this.$axios.get(`/pacientes/perfil/${localStorage.id}`);
+          } = await this.$axios.get(
+            `/pacientes/perfil/${localStorage.id}`
+          );
           this.values = data.Endereco;
           this.paciente = data;
           this.loading = false;
@@ -274,6 +300,8 @@
           console.log(error);
         }
       },
+
+      /* Função que faz o soft delete do endereço do paciente */
       async DeleteEnd({
         id
       }) {
@@ -285,14 +313,19 @@
           console.log(error);
         }
       },
+
+      /*Função que reseta os campos e e abre o DLG para inclusao de um novo endereco*/
       IncludeEnd() {
-        this.ResetEnd()
+        this.ResetEnd();
+        this.disableCEP = false;
         this.show = true;
       },
+      /* Função que atribui para as variáveis os valores que estão sendo editados. Após clicar em salvar a função SaveEnd é chamada.*/
       EditEnd() {
-        this.show = true
-        this.newEnd.cep = this.selected[0].cep
-        this.newEnd.id = this.selected[0].id
+        this.disableCEP = true;
+        this.show = true;
+        this.newEnd.cep = this.selected[0].cep;
+        this.newEnd.id = this.selected[0].id;
         this.newEnd.bairro = this.selected[0].bairroInicial;
         this.newEnd.municipio = this.selected[0].municipio;
         this.newEnd.complemento = this.selected[0].complemento;
@@ -302,13 +335,29 @@
         this.newEnd.referencia = this.selected[0].referencia;
         this.newEnd.uf = this.selected[0].uf;
       },
+      /* Função Salva o endereço, tanto na edição quanto na inclusão. */
       async SaveEnd() {
         try {
-          await this.$axios.post(`/pacientes/endereco/${localStorage.id}`, this.newEnd)
+          /* Faz o post dos dados preenchidos pelo usuario na ROTA,a rota vai tratar se é para atualizar ou inserir um novo endereço. */
+          await this.$axios.post(
+            `/pacientes/endereco/${localStorage.id}`,
+            this.newEnd
+          );
+          /* Atualiza o GRID de Endereços após o retorno da rota. */
+          this.loading = true;
+          const {
+            data
+          } = await this.$axios.get(
+            `/pacientes/perfil/${localStorage.id}`
+          );
+          this.values = data.Endereco;
+          this.loading = false;
+          this.disableCEP = false;
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
       },
+      /* Função que busca o CEP no Correio */
       async CepVerify() {
         if (!this.newEnd.cep) {
           return;
@@ -323,23 +372,26 @@
 
           const endereco = data.return.end.split(" ");
           endereco.splice(0, 1);
+
           this.newEnd.bairro = data.return.bairro;
           this.newEnd.cidade = data.return.cidade;
           this.newEnd.complemento = data.return.complemento2;
           this.newEnd.logradouro = endereco.join(" ");
           this.newEnd.tipo = data.return.end.split(" ")[0];
           this.newEnd.uf = data.return.uf;
-          this.newEnd.municipio = data.return.cidade
+          this.newEnd.municipio = data.return.cidade;
           this.loadingCep = false;
         } catch (error) {
           console.log(error);
         }
       },
+
+      /* Função que valida se o CPF esta certo */
       CpfVerify() {
         let Soma;
         let Resto;
         Soma = 0;
-        if (this.cpf == "00000000000") return false;
+        if (this.cpf == "00000000000" || !this.cpf) return false;
 
         for (let i = 1; i <= 9; i++)
           Soma = Soma + parseInt(this.cpf.substring(i - 1, i)) * (11 - i);
