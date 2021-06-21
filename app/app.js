@@ -3,11 +3,12 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const cors = require('cors')
 
-//Import das rotas 
+//Import das rotas
 const Login = require('./login')
 const Correios = require('./Correios/consultasCorreios')
 const Agendamentos = require('./Agendamentos/agendamentos')
 const MotivosCancelamentos = require('./Agendamentos/motivosCancelamentos')
+const Especialidades = require('./Agendamentos/especialidades')
 const Pacientes = require('./Pacientes/pacientes')
 
 //Declaração de Variaveis
@@ -40,7 +41,7 @@ app.use(passport.session())
 app.use('/', Login)
 app.use('/pacientes', Pacientes)
 app.use('/correios', Correios)
-app.use('/agendamentos', Agendamentos, MotivosCancelamentos)
+app.use('/agendamentos', Agendamentos, MotivosCancelamentos,Especialidades)
 
 
 //Inicio do WebService
