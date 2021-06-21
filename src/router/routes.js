@@ -11,7 +11,11 @@ const routes = [{
       },
       {
         path: '/StepperAppointments',
-        component: () => import('components/StepperAppointments.vue')
+        component: () => import('components/StepperConfirmacaoAgendamentos.vue')
+      },
+      {
+        path: '/Agendar',
+        component: () => import('components/Agendar.vue')
       },
     ]
   },

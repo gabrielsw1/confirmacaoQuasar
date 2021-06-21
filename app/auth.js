@@ -7,10 +7,10 @@ module.exports = function (passport) {
   passport.use(new localStrategy(async (username, password, done) => {
     const client = await db.pool.connect()
     client.query(`
-            select * from sigh.pacientes where email = '${username}' limit 1
+            select * from sigh.pacientes where email Ilike '${username}' limit 1
         `)
       .then(paciente => {
-        
+
         if (paciente.rows.length === 0) {
           return done(null, false)
         }

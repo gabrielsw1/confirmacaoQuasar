@@ -2,79 +2,85 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="bg-grey-3">
-        <q-btn flat dense round icon="menu" color="blue" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
+        <q-btn flat dense round icon="menu" color="blue" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen"/>
         <q-toolbar-title>
           <b class="text-blue"> MV</b><span class="text-black" @click="$router.push('/main')">
             Hospidata
           </span>
         </q-toolbar-title>
-        <q-btn flat round dense icon="power_settings_new" color="blue" @click="logout" />
+        <q-btn flat round dense icon="power_settings_new" color="blue" @click="logout"/>
       </q-toolbar>
     </q-header>
     <q-drawer v-model="leftDrawerOpen" overlay bordered content-class="bg-grey-1">
       <q-list>
         <q-item-label header class="text-grey-8">
           <q-btn flat dense round icon="menu" color="blue" aria-label="Menu"
-            @click="leftDrawerOpen = !leftDrawerOpen" />
+                 @click="leftDrawerOpen = !leftDrawerOpen"/>
           Menus
         </q-item-label>
-        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
+        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link"/>
       </q-list>
     </q-drawer>
     <q-page-container>
-      <router-view />
+      <router-view/>
       <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
-        <q-btn fab icon="keyboard_arrow_up" color="primary" />
+        <q-btn fab icon="keyboard_arrow_up" color="primary"/>
       </q-page-scroller>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-  import EssentialLink from "components/EssentialLink.vue";
+import EssentialLink from "components/LinksMenus.vue";
 
-  const linksData = [{
-      title: "Agendamentos",
-      caption: "Agendamentos não confirmados",
-      icon: "event",
-      to: "/StepperAppointments"
-    },
-    {
-      title: "Histórico de Agendamentos",
-      caption: "Status dos agendamentos",
-      icon: "event_note",
-      link: "https://github.com/quasarframework"
-    },
-    {
-      title: "Histórico de Pagamentos",
-      caption: "Informações de Pagamentos",
-      icon: "credit_score",
-      link: "https://chat.quasar.dev"
-    },
-    {
-      title: "Perfil",
-      caption: "Dados Pessoais",
-      icon: "account_box",
-      link: "https://forum.quasar.dev"
-    }
-  ];
+const linksData = [{
+  title: "Agendar",
+  caption: "Realize seu agendamento",
+  icon: "event",
+  to: "/Agendar"
+},
+  {
+    title: "Confirmação",
+    caption: "Confirme seus agendamentos",
+    icon: "event_available",
+    to: "/StepperAppointments"
+  },
+  {
+    title: "Histórico de Agendamentos",
+    caption: "Status dos agendamentos",
+    icon: "event_note",
+    link: "https://github.com/quasarframework"
+  },
+  {
+    title: "Histórico de Pagamentos",
+    caption: "Informações de Pagamentos",
+    icon: "credit_score",
+    link: "https://chat.quasar.dev"
+  },
+  {
+    title: "Perfil",
+    caption: "Dados Pessoais",
+    icon: "account_box",
+    link: "https://forum.quasar.dev"
+  }
+];
 
-  export default {
-    name: "MainLayout",
-    components: {
-      EssentialLink
-    },
-    data() {
-      return {
-        leftDrawerOpen: false,
-        essentialLinks: linksData
-      };
-    },
-    methods: {
-      logout() {
-        this.$router.push("/");
-      }
+export default {
+  name: "MainLayout",
+  components: {
+    EssentialLink
+  },
+  data() {
+    return {
+      leftDrawerOpen: false,
+      essentialLinks: linksData
+    };
+  },
+  methods: {
+    logout() {
+      this.$router.push("/");
     }
-  };
+  }
+};
 
 </script>

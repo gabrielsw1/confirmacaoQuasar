@@ -46,9 +46,9 @@
   export default {
     name: "StepperAppointments",
     components: {
-      PendingAppointments: () => import("./PendingAppointments"),
-      ConfirmAppointments: () => import("./ConfirmAppointments"),
-      PersonalData: () => import("./PersonalData")
+      PendingAppointments: () => import("./AgendamentosPendentes"),
+      ConfirmAppointments: () => import("./ConfirmarAgendamentos"),
+      PersonalData: () => import("./DadosPessoais")
     },
     data() {
       return {
