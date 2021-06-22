@@ -66,19 +66,24 @@ export default {
   },
   mounted() {
     this.BuscarItensAgendamentos()
+    this.ResetarState()
   },
   watch: {
-    TipoAgendamento() {
+    TipoAgendamento(val) {
       this.ItemAgendamentoSelecionado = null
       this.ConvenioSelecionado = null
       this.CategoriaSelecionada = null
       this.MedicoSelecionado = null
+      this.ResetarState()
+      this.$store.commit('agendar/AlterarTipoItemAgendamento', val)
       this.BuscarItensAgendamentos()
     },
     ItemAgendamentoSelecionado(val) {
       if (val) {
         this.BuscarConveniosPorItemAgendamento(this.TipoAgendamento, val.value)
+        this.$store.commit('agendar/AlteraridItemAgendamento', val.value)
       } else {
+        this.$store.commit('agendar/AlteraridItemAgendamento', null)
         this.MedicoSelecionado = null
         this.ConvenioSelecionado = null
       }
@@ -86,15 +91,38 @@ export default {
     ConvenioSelecionado(val) {
       this.CategoriaSelecionada = null
       this.MedicoSelecionado = null
-      if (val) {
+      if (val.value) {
         this.BuscarCategorias(val.value)
+        this.$store.commit('agendar/AlterarConvenio', this.ConvenioSelecionado.value)
         if (this.TipoAgendamento === 'consulta') {
           this.BuscarMedicosPorConvenio(this.ItemAgendamentoSelecionado.value, this.ConvenioSelecionado.value)
         }
       }
+    },
+    CategoriaSelecionada(val) {
+      if (val.value) {
+        this.$store.commit('agendar/AlterarCategoria', val.value)
+      } else {
+        this.$store.commit('agendar/AlterarCategoria', null)
+      }
+
+    },
+    MedicoSelecionado(val) {
+      if (val.value) {
+        this.$store.commit('agendar/AlterarMedico', val.value)
+      } else {
+        this.$store.commit('agendar/AlterarMedico', null)
+      }
+
     }
   },
   methods: {
+    ResetarState(){
+      this.$store.commit('agendar/AlteraridItemAgendamento', null)
+      this.$store.commit('agendar/AlterarConvenio',null)
+      this.$store.commit('agendar/AlterarCategoria', null)
+      this.$store.commit('agendar/AlterarMedico', null)
+    },
     async BuscarMedicosPorConvenio(idItemAgendamento, idConvenio) {
       try {
         const {data} = await this.$axios.get(

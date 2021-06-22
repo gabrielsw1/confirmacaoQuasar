@@ -4,12 +4,12 @@
       <q-step :name="1" title="Selecione o que deseja agendar" :done="step > 1">
         <FiltroAgendar/>
         <q-stepper-navigation>
-          <q-btn @click="step += 1" color="primary" label="Continuar" />
+          <q-btn @click="step += 1" color="primary" label="Continuar" :disable="this.$store.getters['agendar/HabilitarEtapaUmAgendamento']"/>
         </q-stepper-navigation>
       </q-step>
 
       <q-step :name="2" title="Selecione os horários" :done="step > 2">
-        etapa 2
+            <SelecionarHorarioAgendamento/>
 
         <q-stepper-navigation>
           <q-btn flat @click="step -= 1" color="primary" label="Voltar" class="q-ml-sm" />
@@ -45,7 +45,8 @@
 export default {
   name: "Agendar",
   components: {
-    FiltroAgendar: () => import('./FiltroAgendar.vue')
+    FiltroAgendar: () => import('./FiltroAgendar.vue'),
+    SelecionarHorarioAgendamento: () => import('./SelecionarHorarioAgendamento')
   },
   data() {
     return {
