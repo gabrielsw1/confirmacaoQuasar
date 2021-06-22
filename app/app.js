@@ -9,6 +9,10 @@ const Correios = require('./Correios/consultasCorreios')
 const Agendamentos = require('./Agendamentos/agendamentos')
 const MotivosCancelamentos = require('./Agendamentos/motivosCancelamentos')
 const Especialidades = require('./Agendamentos/especialidades')
+const Exames = require('./Agendamentos/exames')
+const Convenios = require('./Agendamentos/convenios')
+const Categorias = require('./Agendamentos/categorias')
+const Prestador = require('./Agendamentos/prestadorPorConvenio')
 const Pacientes = require('./Pacientes/pacientes')
 
 //Declaração de Variaveis
@@ -25,14 +29,14 @@ app.use(bodyParser.urlencoded({
   extended: false
 }))
 app.use(bodyParser.json());
-app.use(cors({origin:true,credentials: true}))
+app.use(cors({origin: true, credentials: true}))
 
 //Configuracoes Sessao
 app.use(session({
   secret: 'teste',
   resave: false,
   saveUninitialized: false,
-  cookie:{maxAge: 30 * 60 * 1000} //30min
+  cookie: {maxAge: 30 * 60 * 1000} //30min
 }))
 app.use(passport.initialize())
 app.use(passport.session())
@@ -41,7 +45,7 @@ app.use(passport.session())
 app.use('/', Login)
 app.use('/pacientes', Pacientes)
 app.use('/correios', Correios)
-app.use('/agendamentos', Agendamentos, MotivosCancelamentos,Especialidades)
+app.use('/agendamentos', Agendamentos, MotivosCancelamentos, Especialidades, Exames, Convenios,Categorias,Prestador)
 
 
 //Inicio do WebService

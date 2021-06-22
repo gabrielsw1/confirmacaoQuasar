@@ -2,22 +2,22 @@ const express = require('express')
 const router = express.Router()
 const db = require('../dbConnect')
 
-router.get('/especialidades', (req, res) => {
+router.get('/exames', (req, res) => {
     (async() => {
         const client = await db.pool.connect()
         try {
-            const especialidades = await client.query(
-                    `select distinct a.cod_especialidade     as "value"
-                                    , esp.nm_especialidade                  as "label"
+            const exames = await client.query(
+                    `select distinct a.cod_exame   as "value"
+                                                 , proc.descr_proc  as "label"
                                     from sigh.agendas a
                                              inner join sigh.agendamentos ag on (ag.cod_agenda = a.id_agenda)
                                              inner join sigh.tipos_agendamentos ta on (ta.id_tp_agendamento = a.cod_tp_agendamento)
-                                             inner join sigh.especialidades_principais esp on (esp.id_esp_principal = a.cod_especialidade)
+                                             inner join sigh.procedimentos proc on (proc.id_procedimento = a.cod_exame)
                                     where ag.fechado = 'A'
                                       and a.agenda_web = true
                                       and a.data_agenda >= current_date
-                                      and ta.codigo_tp_agendamento = '2'
-                                      and a.cod_especialidade is not null
+                                      and ta.codigo_tp_agendamento = '3'
+                                      and a.cod_exame is not null
                                       and coalesce((select count(*)
                                                      from sigh.agendamentos
                                                      where cod_agenda = a.id_agenda
@@ -26,7 +26,7 @@ router.get('/especialidades', (req, res) => {
                                                        and ativo
                                                        and (bloqueado = false and fechado = 'A')), 0) > 0
                                                        order by label`)
-            res.status(200).json(especialidades.rows)
+            res.status(200).json(exames.rows)
         } finally {
             client.release()
         }

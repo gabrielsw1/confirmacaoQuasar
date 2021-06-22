@@ -1,7 +1,7 @@
 <template>
   <div class="no-padding">
     <q-stepper v-model="step" vertical color="primary" animated class="no-padding">
-      <q-step :name="1" title="Selecione os agendamentos" :done="step > 1">
+      <q-step :name="1" title="Selecione o que deseja agendar" :done="step > 1">
         <FiltroAgendar/>
         <q-stepper-navigation>
           <q-btn @click="step += 1" color="primary" label="Continuar" />
