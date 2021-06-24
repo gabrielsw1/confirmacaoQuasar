@@ -13,6 +13,7 @@ const Exames = require('./Agendamentos/exames')
 const Convenios = require('./Agendamentos/convenios')
 const Categorias = require('./Agendamentos/categorias')
 const Prestador = require('./Agendamentos/prestadorPorConvenio')
+const DataAgendasPorFiltro = require('./Agendamentos/dataAgendasPorFiltro')
 const Pacientes = require('./Pacientes/pacientes')
 
 //Declaração de Variaveis
@@ -45,7 +46,7 @@ app.use(passport.session())
 app.use('/', Login)
 app.use('/pacientes', Pacientes)
 app.use('/correios', Correios)
-app.use('/agendamentos', Agendamentos, MotivosCancelamentos, Especialidades, Exames, Convenios,Categorias,Prestador)
+app.use('/agendamentos', Agendamentos, MotivosCancelamentos, Especialidades, Exames, Convenios, Categorias, Prestador, DataAgendasPorFiltro)
 
 
 //Inicio do WebService

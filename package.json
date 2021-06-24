@@ -26,7 +26,8 @@
     "passport-local": "^1.0.0",
     "pg": "^8.5.1",
     "quasar": "^1.0.0",
-    "soap": "^0.36.0"
+    "soap": "^0.36.0",
+    "vue-ctk-date-time-picker": "^2.5.0"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

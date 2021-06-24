@@ -28,7 +28,16 @@
     </div>
     <div v-show="TipoAgendamento === 'consulta'" class="col-12 col-sm-3">
       <q-select hint="Opcional" label="Selecione o(a) Médico(a)" :options="MedicosPorConvenio"
-                v-model="MedicoSelecionado" dense/>
+                v-model="MedicoSelecionado" dense>
+        <template v-slot:no-option>
+          <q-item>
+            <q-item-section class="text-italic text-grey">
+              <span>Nenhum(a) Médico(a) encontrado(a) para esta especialidade.
+                Preencha o convênio e clique em <b>"continuar"</b> para visualizar os dias disponíveis.</span>
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
     </div>
 
     <!-- Dialog para Alertas de sucesso e erro -->
@@ -117,9 +126,10 @@ export default {
     }
   },
   methods: {
-    ResetarState(){
+    ResetarState() {
+      this.$store.commit('agendar/AlterarTipoItemAgendamento', 'consulta')
       this.$store.commit('agendar/AlteraridItemAgendamento', null)
-      this.$store.commit('agendar/AlterarConvenio',null)
+      this.$store.commit('agendar/AlterarConvenio', null)
       this.$store.commit('agendar/AlterarCategoria', null)
       this.$store.commit('agendar/AlterarMedico', null)
     },

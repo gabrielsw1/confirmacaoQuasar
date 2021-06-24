@@ -13,24 +13,7 @@
 
         <q-stepper-navigation>
           <q-btn flat @click="step -= 1" color="primary" label="Voltar" class="q-ml-sm" />
-          <q-btn @click="step += 1" color="primary" label="Continuar" />
-        </q-stepper-navigation>
-      </q-step>
-
-      <q-step :name="3" title="Confirmar agendamentos" :done="step > 3">
-       etapa 3
-
-        <q-stepper-navigation>
-          <q-btn flat @click="step -= 1" color="primary" label="Voltar" class="q-ml-sm" />
-          <q-btn @click="step += 1" color="primary" label="Continuar" />
-        </q-stepper-navigation>
-      </q-step>
-
-      <q-step :name="4" title="Conclusão" :done="step > 4">
-        teste 4
-        <q-stepper-navigation>
-          <q-btn flat @click="step -= 1" color="primary" label="Voltar" class="q-ml-sm" />
-          <q-btn color="primary" label="Concluir" />
+          <q-btn @click="step += 1" color="primary" label="Agendar" />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
