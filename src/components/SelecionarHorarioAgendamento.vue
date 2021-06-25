@@ -1,18 +1,47 @@
 <template>
   <div class="row q-col-gutter-sm" style="width: 100%">
 
-    <div class="q-gutter-sm col-6 col-sm-3">
-      <q-date class="shadow-3" v-model="DataSelecionada" color="light-blue-9" title="dia" subtitle="Selecione o" today-btn
+    <div class="q-gutter-sm col-auto col-sm-3">
+      <q-date class="shadow-3" v-model="DataSelecionada" color="light-blue-9" subtitle="Selecione o dia" today-btn
               :options="Options" @click="SelecionarHorarioAgendamento"></q-date>
     </div>
-    <div class="q-gutter-sm col-11 col-sm-9">
+    <div class="q-gutter-sm col-auto col-sm-9" v-if="HorarioSelecionado">
       <q-card class="shadow-3">
         <q-card-section class="bg-light-blue-9">
           <div class="text-h6 text-white">Informações do Agendamento</div>
         </q-card-section>
         <q-separator/>
         <q-card-section>
-          Informações Gerais do atendimento
+          <div class="row q-col-gutter-sm" style="width: 100%">
+            <div class="col-12 col-sm-2">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Data" v-model="HorarioSelecionado.dtAgendamento" />
+            </div>
+            <div class="col-12 col-sm-5">
+              <q-select options-dense dense standout="bg-blue text-white" label="Selecione o Horário" :options="Horarios" v-model="HorarioSelecionado"
+                        behavior="dialog"/>
+            </div>
+            <div class="col-12 col-sm-5">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Descrição" v-model="HorarioSelecionado.itemAgendamento" />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Médico" v-model="HorarioSelecionado.nmPrestador" />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Instituição" v-model="HorarioSelecionado.hospital" />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Endereço" v-model="HorarioSelecionado.logradouro" />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Bairro" v-model="HorarioSelecionado.bairro" />
+            </div>
+            <div class="col-12 col-sm-4">
+              <q-input disable outlined standout="bg-blue text-white" dense label="Cidade" v-model="HorarioSelecionado.cidade" />
+            </div>
+            <div class="col-12 col-sm-12">
+              <q-input outlined  dense label="Orientações" type="textarea" v-model="HorarioSelecionado.orientacao"/>
+            </div>
+          </div>
         </q-card-section>
       </q-card>
     </div>
@@ -28,7 +57,7 @@
 
         <div class="q-mx-lg">
           <q-select options-dense dense label="Selecione o Horário" :options="Horarios" v-model="HorarioSelecionado"
-                    behavior="dialog"/>
+                    behavior="dialog"     />
         </div>
 
         <q-card-actions align="right">

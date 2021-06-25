@@ -60,13 +60,25 @@ router.get('/agendas/:tipo/:idItemAgendamento/:idConvenio/:idMedico', (req, res)
         res.status(200).json(rows)
       } else if (req.query.data && req.params.tipo == 'exame') {
         const {rows} = await client.query(
-          `select distinct ag.id_agendamento       as "value"
-                                          , to_char(ag.hora_atend_iten_agen, 'HH24:MI') as "label"
+          `select distinct ag.id_agendamento                                                               as "value"
+                                        , to_char(ag.hora_atend_iten_agen, 'HH24:MI')                                       as "label"
+                                        , (to_char(coalesce(ag.data_hora_agendamento, a.data_agenda), 'DD/MM/YYYY'))        as "dtAgendamento"
+                                        , (to_char(ag.hora_atend_iten_agen, 'HH24:MI'))                                     as "hora"
+                                        , proc.descr_red_proc                                                               as "itemAgendamento"
+                                        , coalesce(h.nome_reduzido, h.nome)                                                 as "hospital"
+                                        , (l.tp_logradouro || ' ' || l.logradouro || ', ' || h.numero)                      as "logradouro"
+                                        , l.municipio                                                                       as "cidade"
+                                        , l.bairro_inicial                                                                  as "bairro"
+                                        , (coalesce(prest.nome_reduzido, prest.nm_prestador,'Não informado'))               as "nmPrestador"
+                                        , proc.orientacoes_internacao                                                       as "orientacao"
                             from sigh.agendas a
                                      inner join sigh.agendamentos ag on (ag.cod_agenda = a.id_agenda)
                                      inner join sigh.tipos_agendamentos ta on (ta.id_tp_agendamento = a.cod_tp_agendamento)
                                      inner join sigh.procedimentos proc on (proc.id_procedimento = a.cod_exame)
                                      inner join sigh.agendas_convenios ac on (a.id_agenda = ac.cod_agenda)
+                                     left join sigh.prestadores prest on (prest.id_prestador = a.cod_medico)
+                                     left join sigh.hospitais h on (h.id_hospital = a.cod_hospital)
+                                     left join endereco_sigh.logradouros l on (l.id_logradouro = h.cod_logradouro)
                             where
                               ag.data_atend_iten_agend = $3
                               and ag.fechado = 'A'
@@ -91,15 +103,28 @@ router.get('/agendas/:tipo/:idItemAgendamento/:idConvenio/:idMedico', (req, res)
         res.status(200).json(rows)
       } else if (req.query.data || req.params.tipo == 'consulta') {
         const filtroMedico = req.params.idMedico && req.params.idMedico != 0 ? ` and a.cod_medico = ${req.params.idMedico}` : ''
+
+        console.log(req.params)
+        console.log(req.query)
         const {rows} = await client.query(
-          `select distinct ag.id_agendamento                                                             as "value"
-                                        , (to_char(ag.hora_atend_iten_agen, 'HH24:MI') || ' - ' || prest.nm_prestador)    as "label"
+          `select distinct ag.id_agendamento                                                               as "value"
+                                        , (to_char(ag.hora_atend_iten_agen, 'HH24:MI') || ' - ' || prest.nm_prestador)      as "label"
+                                        , (to_char(coalesce(ag.data_hora_agendamento, a.data_agenda), 'DD/MM/YYYY'))        as "dtAgendamento"
+                                        , (to_char(ag.hora_atend_iten_agen, 'HH24:MI'))                                     as "hora"
+                                        , esp.nm_especialidade                                                              as "itemAgendamento"
+                                        , coalesce(h.nome_reduzido, h.nome)                                                 as "hospital"
+                                        , (l.tp_logradouro || ' ' || l.logradouro || ', ' || h.numero)                      as "logradouro"
+                                        , l.municipio                                                                       as "cidade"
+                                        , l.bairro_inicial                                                                  as "bairro"
+                                        , (coalesce(prest.nome_reduzido, prest.nm_prestador,'Não informado'))                               as "nmPrestador"
                             from sigh.agendas a
                                      inner join sigh.agendamentos ag on (ag.cod_agenda = a.id_agenda)
                                      inner join sigh.tipos_agendamentos ta on (ta.id_tp_agendamento = a.cod_tp_agendamento)
                                      inner join sigh.especialidades_principais esp on (esp.id_esp_principal = a.cod_especialidade)
                                      inner join sigh.agendas_convenios ac on (a.id_agenda = ac.cod_agenda)
                                      left join sigh.prestadores prest on (prest.id_prestador = a.cod_medico)
+                                     left join sigh.hospitais h on (h.id_hospital = a.cod_hospital)
+                                     left join endereco_sigh.logradouros l on (l.id_logradouro = h.cod_logradouro)
                             where
                             ag.data_atend_iten_agend = $3
                             and ag.fechado = 'A'
