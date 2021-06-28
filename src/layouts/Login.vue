@@ -5,21 +5,23 @@
         <form @submit.prevent="login">
           <div class="row">
             <div class="col-12 flex flex-center">
-              <img alt="logo" src="../assets/logo.jpg" />
+              <img alt="logo" src="../assets/logo.jpg"/>
             </div>
             <div class="col-12 q-ma-xs">
               <q-input :rules="[ val => val && val.length > 0 || 'Informe o CPF ou E-mail']" dense rounded outlined
-                label="Informe o CPF ou E-mail" v-model="Paciente.username" />
+                       label="Informe o CPF ou E-mail" v-model="Paciente.username"/>
             </div>
             <div class="col-12 q-ma-xs">
               <q-input :rules="[ val => val && val.length > 0 || 'Informe a Senha']" type="password" dense rounded
-                outlined label="Informe a senha" v-model="Paciente.password" />
+                       outlined label="Informe a senha" v-model="Paciente.password"/>
             </div>
             <div class="col-12 q-ma-xs">
               <q-btn type="submit" :Loading="Loading" :disable="disable" class="full-width shadow-7" dense unelevated
-                rounded color="primary" label="Entrar">
+                     rounded color="primary" label="Entrar">
                 <template v-slot:Loading>
-                  <q-spinner-facebook /> </template></q-btn>
+                  <q-spinner-facebook/>
+                </template>
+              </q-btn>
             </div>
           </div>
         </form>
@@ -38,73 +40,73 @@
 </template>
 
 <script>
-  export default {
-    data() {
-      return {
-        ShowAlert: false,
-        Position: null,
-        Message: null,
-        BgClass: null,
-        Loading: false,
-        Paciente: {
-          username: null,
-          password: null
-        }
-      };
-    },
-    created() {
-      this.$q.addressbarColor.set('#2E86C1')
-    },
-    computed: {
-      disable() {
-        if (!this.Paciente.username || !this.Paciente.password) {
-          return true
-        }
-        return false
+export default {
+  data() {
+    return {
+      ShowAlert: false,
+      Position: null,
+      Message: null,
+      BgClass: null,
+      Loading: false,
+      Paciente: {
+        username: null,
+        password: null
       }
-    },
-    methods: {
-      async login() {
-        try {
-          this.Loading = true;
-          const {
-            data
-          } = await this.$axios.post("/login", {
-            username: this.Paciente.username,
-            password: this.Paciente.password
-          });
-          this.$store.commit("user/AlterUser", data);
-          this.Loading = false;
-          localStorage.id = data.id_paciente
-          this.$router.push({
-            path: "/main"
-          });
-        } catch (error) {
-          this.OpenAlertDialog(
-            "bottom",
-            "bg-red text-white",
-            "ERRO: Usuário ou senha incorretos"
-          );
-          this.Loading = false;
-        }
-      },
-      OpenAlertDialog(position, bgclass, message) {
-        this.Position = position;
-        this.BgClass = bgclass;
-        this.Message = message;
-        this.ShowAlert = true;
-        setTimeout(() => {
-          this.ShowAlert = false;
-        }, 2000);
+    };
+  },
+  created() {
+    this.$q.addressbarColor.set('#2E86C1')
+  },
+  computed: {
+    disable() {
+      if (!this.Paciente.username || !this.Paciente.password) {
+        return true
       }
+      return false
     }
-  };
+  },
+  methods: {
+    async login() {
+      try {
+        this.Loading = true;
+        const {
+          data
+        } = await this.$axios.post("/login", {
+          username: this.Paciente.username,
+          password: this.Paciente.password
+        });
+        this.$store.commit("user/AlterUser", data);
+        this.Loading = false;
+        localStorage.id = data.id_paciente
+        this.$router.push({
+          path: "/main"
+        });
+      } catch (error) {
+        this.OpenAlertDialog(
+          "bottom",
+          "bg-red text-white",
+          "ERRO: Usuário ou senha incorretos"
+        );
+        this.Loading = false;
+      }
+    },
+    OpenAlertDialog(position, bgclass, message) {
+      this.Position = position;
+      this.BgClass = bgclass;
+      this.Message = message;
+      this.ShowAlert = true;
+      setTimeout(() => {
+        this.ShowAlert = false;
+      }, 2000);
+    }
+  }
+};
 
 </script>
 
 <style>
-  .card-style {
-    width: 300px;
-  }
+.card-style {
+  width: 300px;
+}
 
 </style>

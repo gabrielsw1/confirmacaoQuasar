@@ -181,7 +181,7 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                             , ${agendamentoOriginal[0].cod_setor}
                                             , ${agendamentoOriginal[0].cod_sala}
                                             , ${agendamentoOriginal[0].cod_cbo}
-                                            , ${null} 
+                                            , ${null}
                                             , '${agendamentoOriginal[0].consulta_retorno}'
                                             , '${agendamentoOriginal[0].meio_agendamento}'
                                             , '${agendamentoOriginal[0].cobrar}'
@@ -219,5 +219,21 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
     })
   })
 })
+
+router.post('/agendar', ((req, res) => {
+  (async () => {
+    const client = await db.pool.connect()
+    try {
+      const {idPaciente,idAgendamento,idConvenio,idCategoria}  = req.body
+      const {rows} = await client.query('update sigh.agendamentos set cod_paciente = $1 where id_agendamento = $2',[parseInt(idPaciente),idAgendamento])
+      res.status(200).json(rows)
+    } finally {
+      client.release()
+    }
+  })().catch((e) => {
+    console.log(e)
+    res.status(400).json(e)
+  })
+}))
 
 module.exports = router

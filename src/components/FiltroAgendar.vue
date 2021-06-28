@@ -20,11 +20,11 @@
     </div>
     <div class="col-12 col-sm-3">
       <q-select label="Selecione o Convênio" dense v-model="ConvenioSelecionado"
-                :options="Convenios" :disable="ItemAgendamentoSelecionado ? false : true" :loading="LoadingConv"/>
+                :options="Convenios" :disable="DisableConv" :loading="LoadingConv"/>
     </div>
     <div class="col-12 col-sm-3">
-      <q-select label="Selecione a Categoria/Plano" :disable="ConvenioSelecionado? false : true" :options="Categorias"
-                v-model="CategoriaSelecionada" dense/>
+      <q-select label="Selecione a Categoria/Plano" :disable="DisableCat" :options="Categorias"
+                v-model="CategoriaSelecionada" dense :loading="LoadingCat"/>
     </div>
     <div v-show="TipoAgendamento === 'consulta'" class="col-12 col-sm-3">
       <q-select hint="Opcional" label="Selecione o(a) Médico(a)" :options="MedicosPorConvenio"
@@ -66,6 +66,9 @@ export default {
       MedicosPorConvenio: null,
       MedicoSelecionado: null,
       LoadingConv: false,
+      DisableConv: true,
+      LoadingCat: false,
+      DisableCat: true,
       Message: null,
       Position: null,
       ShowAlert: null,
@@ -150,13 +153,14 @@ export default {
     async BuscarConveniosPorItemAgendamento(tipo, idItemAgendamento) {
       try {
         this.LoadingConv = true
+        this.DisableConv = true
         const {data} = await this.$axios.get(
           `/agendamentos/convenios/${tipo}/${idItemAgendamento}`
         );
         this.Convenios = [...data]
         this.LoadingConv = false
+        this.DisableConv = false
       } catch (e) {
-        this.LoadingConv = false
         this.OpenAlertDialog(
           "bottom",
           "bg-red text-white",
@@ -166,10 +170,14 @@ export default {
     },
     async BuscarCategorias(idConvenio) {
       try {
+        this.LoadingCat = true
+        this.DisableCat = false
         const {data} = await this.$axios.get(
           `/agendamentos/categorias/${idConvenio}`
         );
         this.Categorias = [...data]
+        this.LoadingCat = false
+        this.DisableCat = false
       } catch (e) {
         this.OpenAlertDialog(
           "bottom",

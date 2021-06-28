@@ -16,7 +16,7 @@
               <div class="row">
                 <div class="col-auto q-mr-xs">
                   <b>Proc.:</b> {{ appointment.descrProcedimento }}
-                  {{ appointment.idAgendamento }} 
+                  {{ appointment.idAgendamento }}
                 </div>
                 <div class="col-auto q-mr-xs" v-if="appointment.dtAgendamento">
                   <b>Data:</b> {{ appointment.dtAgendamento }}
@@ -97,20 +97,14 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialog para Alertas de sucesso e erro -->
-    <q-dialog v-model="ShowAlert" :position="Position">
-      <q-card :class="BgClass">
-        <q-card-section>
-          <span>{{ Message }}</span>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
+    <AlertDialog :ShowAlert="ShowAlert" :Position="Position" :BgClass="BgClass" :Message="Message"/>
   </div>
 </template>
 
 <script>
 export default {
   name: "PedingAppointments",
+  components:{AlertDialog: () => import("./AlertDialog")},
   created() {
     this.FindAllAppointments();
   },
@@ -190,7 +184,7 @@ export default {
         );
         await this.FindAllAppointments();
       } catch (error) {
-        console.log(error);
+        console.log(error)
         this.OpenAlertDialog(
           "bottom",
           "bg-red text-white",
