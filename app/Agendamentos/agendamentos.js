@@ -8,22 +8,25 @@ router.get('/consultaAgendamentos/:id', (req, res) => {
     try {
       const agendamentos = await client.query(
         `SELECT
-                    agend.id_agendamento AS "idAgendamento",
-                    p.id_paciente AS "idPaciente",
-					          p.nm_paciente AS "nmPaciente",
+                    agend.id_agendamento                               AS "idAgendamento",
+                    p.id_paciente                                      AS "idPaciente",
+					          p.nm_paciente                                      AS "nmPaciente",
                     TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "dtAgendamento",
-                    TO_CHAR(agend.hora_atend_iten_agen, 'HH:MM') AS "hrAgendamento",
-                    proc.descr_red_proc AS "descrProcedimento",
-                    agend.obs_resp_pag AS "observacaoAgendamento",
-                    conv.nm_convenio AS "nmConvenio",
-                    cat.nm_categoria AS "nmCategoria",
-                    prest.nm_prestador AS "nmPrestador",
-                    h.nome AS "nmHospital",
-                    l.logradouro || ', ' || h.numero AS "logradouro"
+                    TO_CHAR(agend.hora_atend_iten_agen, 'HH:MM')       AS "hrAgendamento",
+                    proc.descr_red_proc                                AS "descrProcedimento",
+                    esp.nm_especialidade                               AS "descrEspecialidade",
+                    agend.obs_resp_pag                                 AS "observacaoAgendamento",
+                    conv.nm_fantasia                                   AS "nmConvenio",
+                    cat.nm_categoria                                   AS "nmCategoria",
+                    prest.nm_prestador                                 AS "nmPrestador",
+                    h.nome                                             AS "nmHospital",
+                    l.logradouro || ', ' || h.numero                   AS "logradouro"
                     FROM
                         sigh.agendas ag
                     LEFT JOIN sigh.agendamentos agend ON
                         agend.cod_agenda = ag.id_agenda
+                    LEFT JOIN sigh.especialidades_principais esp ON
+                        ag.cod_especialidade = esp.id_esp_principal
                     LEFT JOIN sigh.convenios conv ON
                         conv.id_convenio = agend.cod_convenio
                     LEFT JOIN sigh.categorias cat ON
@@ -36,10 +39,12 @@ router.get('/consultaAgendamentos/:id', (req, res) => {
                         h.id_hospital = ag.cod_hospital
                     LEFT JOIN endereco_sigh.logradouros l ON
                         l.id_logradouro = h.cod_logradouro
-                    INNER JOIN sigh.procedimentos proc ON
-                        proc.id_procedimento = agend.cod_procedimento
-                    WHERE agend.cod_paciente = ${req.params.id}
-                    AND cod_motivo_cancelamento is null`) //nao esquecer de mudar o left do procedimento para INNER
+                    left JOIN sigh.procedimentos proc ON
+                        proc.id_procedimento = ag.cod_exame
+                    WHERE agend.cod_paciente = $1
+                    AND ag.data_agenda >= current_date
+                    and ag.agenda_web = true
+                    AND cod_motivo_cancelamento is null`,[req.params.id]) //nao esquecer de mudar o left do procedimento para INNER
       res.status(200).json(agendamentos.rows)
     } finally {
       client.release()
@@ -225,7 +230,8 @@ router.post('/agendar', ((req, res) => {
     const client = await db.pool.connect()
     try {
       const {idPaciente,idAgendamento,idConvenio,idCategoria}  = req.body
-      const {rows} = await client.query('update sigh.agendamentos set cod_paciente = $1 where id_agendamento = $2',[parseInt(idPaciente),idAgendamento])
+      const {rows} = await client.query('' +
+        'update sigh.agendamentos set cod_paciente = $1, cod_convenio = $3, cod_categoria = $4 where id_agendamento = $2',[parseInt(idPaciente),idAgendamento,idConvenio,idCategoria])
       res.status(200).json(rows)
     } finally {
       client.release()

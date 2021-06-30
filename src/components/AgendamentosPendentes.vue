@@ -14,9 +14,8 @@
           <q-card-section horizontal>
             <q-card-section vertical>
               <div class="row">
-                <div class="col-auto q-mr-xs">
-                  <b>Proc.:</b> {{ appointment.descrProcedimento }}
-                  {{ appointment.idAgendamento }}
+                <div class="row col-12 q-mr-xs justify-center">
+                  <q-btn style="width: 100%" dense flat color="light-blue-10">{{ appointment.descrProcedimento || appointment.descrEspecialidade || 'Não informado' }}</q-btn>
                 </div>
                 <div class="col-auto q-mr-xs" v-if="appointment.dtAgendamento">
                   <b>Data:</b> {{ appointment.dtAgendamento }}
@@ -24,19 +23,25 @@
                 <div class="col-auto q-mr-xs" v-if="appointment.hrAgendamento">
                   <b>Hora:</b> {{ appointment.hrAgendamento }}
                 </div>
-                <div class="col-auto q-mr-xs" v-if="appointment.nmPrestador">
-                  <b>Médico:</b> {{ appointment.nmPrestador }}
+                <div class="col-auto q-mr-xs">
+                  <b>Médico(a):</b> {{ appointment.nmPrestador || 'Não informado(a)' }}
                 </div>
-                <div class="col-auto q-mr-xs" v-if="appointment.nmConvenio">
-                  <b>Convênio:</b> {{ appointment.nmConvenio }}
+                <div class="col-auto q-mr-xs">
+                  <b>Convênio:</b> {{ appointment.nmConvenio || 'Não informado' }}
                 </div>
-                <div class="col-auto q-mr-xs" v-if="appointment.nmCategoria">
-                  <b>Plano:</b> {{ appointment.nmCategoria }}
+                <div class="col-auto q-mr-xs">
+                  <b>Plano:</b> {{ appointment.nmCategoria || 'Não informado' }}
+                </div>
+                <div class="col-auto q-mr-xs">
+                  <b>Instituição:</b> {{ appointment.nmHospital || 'Não informada' }}
+                </div>
+                <div class="col-auto q-mr-xs">
+                  <b>Logradouro:</b> {{ appointment.logradouro || 'Não informada' }}
                 </div>
               </div>
             </q-card-section>
 
-            <q-separator vertical />
+            <q-separator vertical/>
 
             <q-card-actions vertical class="justify-around">
               <q-checkbox
@@ -51,7 +56,7 @@
                 icon="event_busy"
                 @click="OpenDialogCancelAppointment(appointment)"
               />
-              <q-btn flat round color="orange-14" icon="update" />
+              <q-btn flat round color="orange-14" icon="update"/>
             </q-card-actions>
           </q-card-section>
         </q-card>
@@ -63,7 +68,7 @@
       <q-card>
         <q-card-section class="row items-center">
           <span class="q-ml-sm"
-            >Tem certeza que deseja cancelar o agendamento do dia
+          >Tem certeza que deseja cancelar o agendamento do dia
             <b>{{ AppointmentSelectedForCancel.dtAgendamento }}</b>
             as <b>{{ AppointmentSelectedForCancel.hrAgendamento }}</b> ?
           </span>
@@ -104,7 +109,7 @@
 <script>
 export default {
   name: "PedingAppointments",
-  components:{AlertDialog: () => import("./AlertDialog")},
+  components: {AlertDialog: () => import("./AlertDialog")},
   created() {
     this.FindAllAppointments();
   },
@@ -173,7 +178,7 @@ export default {
     },
     async CancelAppointment() {
       try {
-        const { status } = await this.$axios.delete(
+        const {status} = await this.$axios.delete(
           `/agendamentos/cancelar/${this.AppointmentSelectedForCancel.idAgendamento}/${this.SelectedReason.value}`
         );
         this.ResetAppontmentsAndReasons();
@@ -195,7 +200,7 @@ export default {
     async FindAllReasons() {
       try {
         this.DisableAndLoadingActive();
-        const { data } = await this.$axios.get(
+        const {data} = await this.$axios.get(
           "/agendamentos/motivos/Cancelamentos"
         );
         this.Reasons = [...data];
@@ -213,7 +218,7 @@ export default {
       try {
         this.CommitAppointmentLoading(true);
         this.Appointments = [];
-        const { data } = await this.$axios.get(
+        const {data} = await this.$axios.get(
           `/agendamentos/consultaAgendamentos/${localStorage.id}`
         );
         this.Appointments = [...data];
