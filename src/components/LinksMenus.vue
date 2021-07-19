@@ -1,13 +1,7 @@
 <template>
-  <q-item
-    clickable
-    :to="to"
-  >
-    <q-item-section
-      v-if="icon"
-      avatar
-    >
-      <q-icon color="blue-10" :name="icon" />
+  <q-item clickable :to="to">
+    <q-item-section v-if="icon" avatar>
+      <q-icon color="blue-10" :name="icon"/>
     </q-item-section>
 
     <q-item-section>

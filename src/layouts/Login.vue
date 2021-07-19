@@ -26,6 +26,13 @@
           </div>
         </form>
       </q-card-section>
+      <q-card-actions class="justify-between">
+        <template v-if="FirstAccess">
+            <q-btn flat label="VOLTAR" color="primary"/>
+            <q-btn label="Cadastrar" color="primary"/>
+        </template>
+        <q-btn v-else  dense flat label="PRIMEIRO ACESSO? CLIQUE AQUI!" class="full-width" color="primary" @click="FirstAccess = true"/>
+      </q-card-actions>
     </q-card>
 
     <!-- Dialog para Alertas de sucesso e erro -->
@@ -43,6 +50,7 @@
 export default {
   data() {
     return {
+      FirstAccess: false,
       ShowAlert: false,
       Position: null,
       Message: null,
@@ -59,10 +67,8 @@ export default {
   },
   computed: {
     disable() {
-      if (!this.Paciente.username || !this.Paciente.password) {
-        return true
-      }
-      return false
+      return !this.Paciente.username || !this.Paciente.password;
+
     }
   },
   methods: {

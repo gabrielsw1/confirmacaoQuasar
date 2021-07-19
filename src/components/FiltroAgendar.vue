@@ -172,9 +172,7 @@ export default {
       try {
         this.LoadingCat = true
         this.DisableCat = false
-        const {data} = await this.$axios.get(
-          `/agendamentos/categorias/${idConvenio}`
-        );
+        const {data} = await this.$axios.get(`/agendamentos/categorias/${idConvenio}`);
         this.Categorias = [...data]
         this.LoadingCat = false
         this.DisableCat = false
@@ -190,16 +188,12 @@ export default {
       try {
         if (this.TipoAgendamento == 'consulta') {
           this.Loading = true
-          const {data} = await this.$axios.get(
-            "/agendamentos/especialidades"
-          );
+          const {data} = await this.$axios.get("/agendamentos/especialidades");
           this.ItensAgendamentos = [...data]
           this.Loading = false
         } else {
           this.Loading = true
-          const {data} = await this.$axios.get(
-            "/agendamentos/exames"
-          );
+          const {data} = await this.$axios.get("/agendamentos/exames");
           this.ItensAgendamentos = [...data]
           this.Loading = false
         }
@@ -228,5 +222,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

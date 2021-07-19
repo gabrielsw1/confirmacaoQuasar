@@ -10,8 +10,8 @@
 
 <script>
 export default {
-name: "AlertDialog",
-  props:['ShowAlert','Position','BgClass','Message'],
+  name: "AlertDialog",
+  props: ['ShowAlert', 'Position', 'BgClass', 'Message'],
 }
 </script>
 

@@ -72,7 +72,6 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
 
       let agendamentoOriginal = await client.query(`select * from sigh.agendamentos where id_agendamento = ${req.params.idHorario}`)
       agendamentoOriginal = agendamentoOriginal.rows
-
       await client.query(`update
                                        sigh.agendamentos
                                     set
@@ -91,7 +90,7 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                        , cod_cbo = null
                                        , compl_iten_agendamento = null
                                        , consulta_retorno = 'N'
-                                       , meio_agendamento = null
+                                       , meio_agendamento = ''
                                        , cobrar = 'N'
                                        , fone_paciente = null
                                        , nm_responsavel = null
@@ -123,6 +122,8 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                         id_agendamento = ${agendamentoOriginal[0].id_agendamento}`)
 
 
+
+
       //Gera o novo registro na agenda com o motivo agendamento
       await client.query(`
                                             insert into
@@ -144,10 +145,8 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                                 , cod_setor
                                                 , cod_sala
                                                 , cod_cbo
-                                                , compl_iten_agendamento
                                                 , consulta_retorno
                                                 , meio_agendamento
-                                                , cobrar
                                                 , fone_paciente
                                                 , nm_responsavel
                                                 , cod_grau_parentesco
@@ -186,10 +185,8 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                             , ${agendamentoOriginal[0].cod_setor}
                                             , ${agendamentoOriginal[0].cod_sala}
                                             , ${agendamentoOriginal[0].cod_cbo}
-                                            , ${null}
                                             , '${agendamentoOriginal[0].consulta_retorno}'
-                                            , '${agendamentoOriginal[0].meio_agendamento}'
-                                            , '${agendamentoOriginal[0].cobrar}'
+                                            , ${agendamentoOriginal[0].meio_agendamento}
                                             , ${agendamentoOriginal[0].fone_paciente || null}
                                             , ${agendamentoOriginal[0].nm_responsavel || null}
                                             , ${agendamentoOriginal[0].cod_grau_parentesco}
@@ -210,8 +207,6 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                             , ${agendamentoOriginal[0].cod_prescricao}
                                             , ${agendamentoOriginal[0].cod_agendamento_integracao_ag}
                                             , ${req.params.motivoCancelamento})`)
-
-
       res.status(200).json("OK")
 
     } finally {

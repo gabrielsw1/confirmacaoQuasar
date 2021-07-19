@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import appointments from './Appointments'
 import agendar from './Agendar'
+import global from './Global'
 import user from './User'
 
 Vue.use(Vuex)
@@ -14,6 +15,7 @@ export default function () {
     modules: {
       appointments,
       agendar,
+      global,
       user
     },
 

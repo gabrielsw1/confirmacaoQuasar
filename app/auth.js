@@ -6,6 +6,7 @@ const md5 = require('md5')
 module.exports = function (passport) {
   passport.use(new localStrategy(async (username, password, done) => {
     const client = await db.pool.connect()
+    console.log('iniciando login')
     client.query(`
             select * from sigh.pacientes where email Ilike '${username}' limit 1
         `)

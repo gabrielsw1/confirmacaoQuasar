@@ -15,7 +15,9 @@
             <q-card-section vertical>
               <div class="row">
                 <div class="row col-12 q-mr-xs justify-center">
-                  <q-btn style="width: 100%" dense flat color="light-blue-10">{{ appointment.descrProcedimento || appointment.descrEspecialidade || 'Não informado' }}</q-btn>
+                  <q-btn class="full-width" dense flat color="light-blue-10">
+                    {{ appointment.descrProcedimento || appointment.descrEspecialidade || 'Não informado' }}
+                  </q-btn>
                 </div>
                 <div class="col-auto q-mr-xs" v-if="appointment.dtAgendamento">
                   <b>Data:</b> {{ appointment.dtAgendamento }}
@@ -47,16 +49,18 @@
               <q-checkbox
                 v-model="AppointmentsSelecteds"
                 :val="appointment"
-                color="green"
-              />
+                color="green"/>
               <q-btn
                 flat
                 round
                 color="red"
                 icon="event_busy"
-                @click="OpenDialogCancelAppointment(appointment)"
-              />
-              <q-btn flat round color="orange-14" icon="update"/>
+                @click="OpenDialogCancelAppointment(appointment)"/>
+              <q-btn
+                flat
+                round
+                color="orange-14"
+                icon="update"/>
             </q-card-actions>
           </q-card-section>
         </q-card>
@@ -102,8 +106,13 @@
       </q-card>
     </q-dialog>
 
-    <AlertDialog :ShowAlert="ShowAlert" :Position="Position" :BgClass="BgClass" :Message="Message"/>
+    <AlertDialog
+      :ShowAlert="ShowAlert"
+      :Position="Position"
+      :BgClass="BgClass"
+      :Message="Message"/>
   </div>
+
 </template>
 
 <script>
@@ -134,15 +143,12 @@ export default {
       return this.Appointments;
     },
     DisableButton() {
-      if (this.SelectedReason) {
-        return false;
-      }
-      return true;
+      return !this.SelectedReason;
     }
   },
   watch: {
-    AppointmentsSelecteds(newValue) {
-      this.$store.commit("appointments/ChangeAppointment", newValue);
+    AppointmentsSelecteds(val) {
+      this.$store.commit("appointments/ChangeAppointment", val);
     }
   },
   methods: {
@@ -178,7 +184,7 @@ export default {
     },
     async CancelAppointment() {
       try {
-        const {status} = await this.$axios.delete(
+        await this.$axios.delete(
           `/agendamentos/cancelar/${this.AppointmentSelectedForCancel.idAgendamento}/${this.SelectedReason.value}`
         );
         this.ResetAppontmentsAndReasons();

@@ -3,7 +3,7 @@
     <q-banner class="bg-primary text-white">
       <div class="row">
         <div class="col-auto q-mr-xl">
-          <b>Agendamentos Selecionados: </b> {{this.$store.getters['appointments/GetCountAppointmentsSelected']}}
+          <b>Agendamentos Selecionados: </b> {{ this.$store.getters['appointments/GetCountAppointmentsSelected'] }}
         </div>
         <div class="col-auto">
           <b>Valor Total: </b> [deve ser colocado o valor total]
@@ -11,10 +11,13 @@
       </div>
     </q-banner>
     <div class="row">
-      <div class="col-12" v-for="appointment in this.$store.getters['appointments/GetAppointmentsSelected']" :key="appointment.idAgendamento">
+      <div class="col-12" v-for="appointment in this.$store.getters['appointments/GetAppointmentsSelected']"
+           :key="appointment.idAgendamento">
         <q-list bordered class="rounded-borders">
-          <q-expansion-item  expand-separator
-            header-class="text-blue text-bold" icon="event_available" :label="appointment.descrProcedimento" :caption="'Data: ' + appointment.dtAgendamento +' Hora: ' + appointment.hrAgendamento">
+          <q-expansion-item expand-separator
+                            header-class="text-blue text-bold" icon="event_available"
+                            :label="appointment.descrProcedimento"
+                            :caption="'Data: ' + appointment.dtAgendamento +' Hora: ' + appointment.hrAgendamento">
             <q-card>
               <q-card-section>
                 <div class="row">
@@ -54,15 +57,15 @@
 </template>
 
 <script>
-  export default {
-    data() {
-      return {
-        expanded: false,
-      };
-    },
-    created(){
+export default {
+  data() {
+    return {
+      expanded: false,
+    };
+  },
+  created() {
 
-    }
-  };
+  }
+};
 
 </script>

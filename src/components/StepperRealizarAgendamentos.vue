@@ -59,7 +59,7 @@ export default {
       try {
         this.$store.commit('agendar/AtivarLoading', true)
         this.$store.dispatch('/agendar/AtivarLoading', true)
-        const {data} = await this.$axios.post(
+        await this.$axios.post(
           `/agendamentos/agendar`, {idPaciente, idAgendamento, idConvenio, idCategoria}
         );
         this.$store.commit('agendar/AtivarLoading', false)
@@ -88,7 +88,6 @@ export default {
       }, 2000);
     },
   },
-
 };
 
 </script>
