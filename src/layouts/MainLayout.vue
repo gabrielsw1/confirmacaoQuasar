@@ -23,13 +23,14 @@
     </q-drawer>
     <q-page-container>
       <router-view/>
-      <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
+
+      <q-page-scroller position="bottom" :scroll-offset="150" :offset="[18, 18]">
         <q-btn fab icon="keyboard_arrow_up" color="primary"/>
       </q-page-scroller>
     </q-page-container>
 
-
-    <q-inner-loading :showing="this.$store.getters['global/HabilitarLoading']" >
+    <FloatButton v-if="$q.platform.is.mobile"/>
+    <q-inner-loading :showing="this.$store.getters['global/HabilitarLoading']">
       <q-spinner-facebook size="85px" color="primary"/>
     </q-inner-loading>
 
@@ -38,18 +39,19 @@
 
 <script>
 import EssentialLink from "components/LinksMenus.vue";
+import FloatButton from "components/FloatButton";
 
 const linksData = [{
   title: "Agendar",
   caption: "Realize seu agendamento",
   icon: "event",
-  to: "/Agendar"
+  to: "/agendar"
 },
   {
     title: "Confirmação",
     caption: "Confirme seus agendamentos",
     icon: "event_available",
-    to: "/StepperAppointments"
+    to: "/confirmar"
   },
   {
     title: "Histórico de Agendamentos",
@@ -74,7 +76,8 @@ const linksData = [{
 export default {
   name: "MainLayout",
   components: {
-    EssentialLink
+    EssentialLink,
+    FloatButton
   },
   data() {
     return {

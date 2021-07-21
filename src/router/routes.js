@@ -10,7 +10,7 @@ const routes = [{
         component: () => import('components/Agendar.vue')
       },
       {
-        path: '/StepperAppointments',
+        path: '/Confirmar',
         component: () => import('components/StepperConfirmacaoAgendamentos.vue')
       },
       {

@@ -44,7 +44,48 @@ router.get('/consultaAgendamentos/:id', (req, res) => {
                     WHERE agend.cod_paciente = $1
                     AND ag.data_agenda >= current_date
                     and ag.agenda_web = true
-                    AND cod_motivo_cancelamento is null`,[req.params.id]) //nao esquecer de mudar o left do procedimento para INNER
+                    AND cod_motivo_cancelamento is null`, [req.params.id]) //nao esquecer de mudar o left do procedimento para INNER
+      res.status(200).json(agendamentos.rows)
+    } finally {
+      client.release()
+    }
+  })().catch((e) => {
+    res.status(400).json(e)
+  })
+
+})
+
+router.get('/pendentes/total/:id', (req, res) => {
+  (async () => {
+    const client = await db.pool.connect()
+    try {
+      const agendamentos = await client.query(
+        `SELECT
+                    count(*) as "totalAgendamentosPendentes"
+                    FROM
+                        sigh.agendas ag
+                    LEFT JOIN sigh.agendamentos agend ON
+                        agend.cod_agenda = ag.id_agenda
+                    LEFT JOIN sigh.especialidades_principais esp ON
+                        ag.cod_especialidade = esp.id_esp_principal
+                    LEFT JOIN sigh.convenios conv ON
+                        conv.id_convenio = agend.cod_convenio
+                    LEFT JOIN sigh.categorias cat ON
+                        cat.id_categoria = agend.cod_categoria
+                    LEFT JOIN sigh.pacientes p ON
+                        p.id_paciente = agend.cod_paciente
+                    LEFT JOIN sigh.prestadores prest ON
+                        prest.id_prestador = agend.cod_medico
+                    INNER JOIN sigh.hospitais h ON
+                        h.id_hospital = ag.cod_hospital
+                    LEFT JOIN endereco_sigh.logradouros l ON
+                        l.id_logradouro = h.cod_logradouro
+                    left JOIN sigh.procedimentos proc ON
+                        proc.id_procedimento = ag.cod_exame
+                    WHERE agend.cod_paciente = $1
+                    AND ag.data_agenda >= current_date
+                    and ag.agenda_web = true
+                    AND cod_motivo_cancelamento is null`, [req.params.id]) //nao esquecer de mudar o left do procedimento para INNER
       res.status(200).json(agendamentos.rows)
     } finally {
       client.release()
@@ -120,8 +161,6 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                        , cod_agendamento_integracao_ag = null
                                    where
                                         id_agendamento = ${agendamentoOriginal[0].id_agendamento}`)
-
-
 
 
       //Gera o novo registro na agenda com o motivo agendamento
@@ -224,9 +263,9 @@ router.post('/agendar', ((req, res) => {
   (async () => {
     const client = await db.pool.connect()
     try {
-      const {idPaciente,idAgendamento,idConvenio,idCategoria}  = req.body
+      const {idPaciente, idAgendamento, idConvenio, idCategoria} = req.body
       const {rows} = await client.query('' +
-        'update sigh.agendamentos set cod_paciente = $1, cod_convenio = $3, cod_categoria = $4 where id_agendamento = $2',[parseInt(idPaciente),idAgendamento,idConvenio,idCategoria])
+        'update sigh.agendamentos set cod_paciente = $1, cod_convenio = $3, cod_categoria = $4 where id_agendamento = $2', [parseInt(idPaciente), idAgendamento, idConvenio, idCategoria])
       res.status(200).json(rows)
     } finally {
       client.release()

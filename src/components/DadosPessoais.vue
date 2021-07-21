@@ -265,6 +265,9 @@ export default {
     this.findPersonalData();
   },
   methods: {
+    AtivarLoading(boolean) {
+      this.$store.commit('global/AtivarLoading', boolean)
+    },
     /* função que reseta os campos dos endereços, usada na inclusão para não pegar sujeira da edição */
     ResetEnd() {
       this.newEnd.id = null;
@@ -282,11 +285,13 @@ export default {
     /* Função que busca todos os dados dos pacientes */
     async findPersonalData() {
       try {
+        this.AtivarLoading(true)
         this.loading = true;
         const {data} = await this.$axios.get(`/pacientes/perfil/${localStorage.id}`);
         this.values = data.Endereco;
         this.paciente = data;
         this.loading = false;
+        this.AtivarLoading(false)
       } catch (error) {
         console.log(error);
       }
@@ -294,9 +299,11 @@ export default {
     /* Função que faz o soft delete do endereço do paciente */
     async DeleteEnd({id}) {
       try {
+        this.AtivarLoading(true)
         await this.$axios.delete(`pacientes/endereco/${id}`);
         this.selected = [];
         this.findPersonalData();
+        this.AtivarLoading(false)
       } catch (error) {
         console.log(error);
       }

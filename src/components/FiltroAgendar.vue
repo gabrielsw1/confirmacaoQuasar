@@ -5,7 +5,7 @@
       <q-radio dense v-model="TipoAgendamento" val="exame" label="Exame"/>
     </div>
     <div class="col-12 col-sm-3">
-      <q-select :label="TipoAgendamento == 'consulta' ? 'Selecione a Especialidade' : 'Selecione o Exame'"
+      <q-select :label="TipoAgendamento === 'consulta' ? 'Selecione a Especialidade' : 'Selecione o Exame'"
                 :options="ItensAgendamentos" v-model="ItemAgendamentoSelecionado" dense :loading="Loading"
                 :disable="Loading">
         <template v-slot:no-option>
@@ -186,7 +186,7 @@ export default {
     },
     async BuscarItensAgendamentos() {
       try {
-        if (this.TipoAgendamento == 'consulta') {
+        if (this.TipoAgendamento === 'consulta') {
           this.Loading = true
           const {data} = await this.$axios.get("/agendamentos/especialidades");
           this.ItensAgendamentos = [...data]

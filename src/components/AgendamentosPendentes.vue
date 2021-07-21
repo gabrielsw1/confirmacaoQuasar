@@ -1,23 +1,43 @@
 <template>
   <div class="no-padding">
-    <div class="row">
-      <div v-if="PendingAppointments.length == 0">
-        Nenhum agendamento localizado
+    <fieldset v-if="$q.platform.is.mobile"
+              style="padding: 2px; margin-bottom: 4px; border: 1px solid lightgrey; border-radius: 3px">
+      <legend style="padding-left: 5px; padding-right: 10px; color: #0d47a1">Legenda</legend>
+      <div style="text-align: center">
+        <q-badge color="grey-4">
+          <q-icon name="check_box" color="green" size="1.3rem"/>
+          <span class="text-black">Selecionar</span>
+        </q-badge>
+        <q-badge color="grey-4" class="q-ml-sm">
+          <q-icon name="event_busy" color="red" size="1.3rem"/>
+          <span class="text-black">Cancelar</span>
+        </q-badge>
+        <q-badge color="grey-4" class="q-ml-sm">
+          <q-icon name="update" color="orange-14" size="1.3rem"/>
+          <span class="text-black">Transferir</span>
+        </q-badge>
       </div>
-      <div
-        v-else
-        class="col-auto q-ma-xs"
-        v-for="appointment in PendingAppointments"
-        :key="appointment.idAgendamento"
-      >
+    </fieldset>
+
+    <div class="row">
+      <div v-if="PendingAppointments.length === 0" class="col align-center">
+        <q-banner dense class="bg-grey-3">
+          <template v-slot:avatar>
+            <q-icon name="sentiment_very_dissatisfied" color="primary"/>
+          </template>
+          Você não possui nenhum agendamento para ser confirmado. Para realizar um agendamento clique
+          <q-btn dense flat color="primary" label="Aqui!" to="/agendar"/>
+        </q-banner>
+      </div>
+      <div v-else class="col-auto q-ma-xs" v-for="appointment in PendingAppointments" :key="appointment.idAgendamento">
         <q-card class="my-card shadow-2 q-mb-xs" bordered>
           <q-card-section horizontal>
             <q-card-section vertical>
               <div class="row">
                 <div class="row col-12 q-mr-xs justify-center">
-                  <q-btn class="full-width" dense flat color="light-blue-10">
+                  <span class="text-light-blue-9 text-bold">
                     {{ appointment.descrProcedimento || appointment.descrEspecialidade || 'Não informado' }}
-                  </q-btn>
+                  </span>
                 </div>
                 <div class="col-auto q-mr-xs" v-if="appointment.dtAgendamento">
                   <b>Data:</b> {{ appointment.dtAgendamento }}
@@ -46,21 +66,17 @@
             <q-separator vertical/>
 
             <q-card-actions vertical class="justify-around">
-              <q-checkbox
-                v-model="AppointmentsSelecteds"
-                :val="appointment"
-                color="green"/>
-              <q-btn
-                flat
-                round
-                color="red"
-                icon="event_busy"
-                @click="OpenDialogCancelAppointment(appointment)"/>
-              <q-btn
-                flat
-                round
-                color="orange-14"
-                icon="update"/>
+              <q-checkbox v-model="AppointmentsSelecteds" :val="appointment" color="green"/>
+              <q-btn flat round color="red" icon="event_busy" @click="OpenDialogCancelAppointment(appointment)">
+                <q-tooltip anchor="center left" self="center right" :offset="[10, 10]">
+                  <strong>Cancelar o agendamento</strong>
+                </q-tooltip>
+              </q-btn>
+              <q-btn flat round color="orange-14" icon="update" @click="AbrirDlgTranferenciaAgendamento(appointment)">
+                <q-tooltip anchor="center left" self="center right" :offset="[10, 10]">
+                  <strong>Transferir o agendamento</strong>
+                </q-tooltip>
+              </q-btn>
             </q-card-actions>
           </q-card-section>
         </q-card>
@@ -71,37 +87,31 @@
     <q-dialog v-model="Show" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <span class="q-ml-sm"
-          >Tem certeza que deseja cancelar o agendamento do dia
-            <b>{{ AppointmentSelectedForCancel.dtAgendamento }}</b>
-            as <b>{{ AppointmentSelectedForCancel.hrAgendamento }}</b> ?
+          <span class="q-ml-sm">Tem certeza que deseja cancelar o agendamento do dia<b>{{
+              AppointmentSelectedForCancel.dtAgendamento
+            }}</b>as <b>{{ AppointmentSelectedForCancel.hrAgendamento }}</b> ?
           </span>
         </q-card-section>
         <div class="q-mx-lg">
-          <q-select
-            v-model="SelectedReason"
-            :options="Reasons"
-            :Loading="Loading"
-            :Disable="Disable"
-            dense
-            label="Selecione o Motivo"
-          />
+          <q-select v-model="SelectedReason" :options="Reasons" :Loading="Loading" :Disable="Disable" dense
+                    label="Selecione o Motivo"/>
         </div>
         <q-card-actions align="right">
-          <q-btn
-            flat
-            label="Voltar"
-            color="primary"
-            v-close-popup
-            @click="ResetAppontmentsAndReasons"
-          />
-          <q-btn
-            label="Confirmar"
-            color="primary"
-            v-close-popup
-            :disable="DisableButton"
-            @click="CancelAppointment"
-          />
+          <q-btn flat label="Voltar" color="primary" v-close-popup @click="ResetAppontmentsAndReasons"/>
+          <q-btn label="Confirmar" color="primary" v-close-popup :disable="DisableButton" @click="CancelAppointment"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialogo de transferencia do agendamento -->
+    <q-dialog v-model="ShowDlgTranferencia" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+            <SelecionarHorarioAgendamento/>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Voltar" color="primary" v-close-popup/>
+          <q-btn label="Transferir" color="primary" v-close-popup :disable="DisableButton"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -118,7 +128,10 @@
 <script>
 export default {
   name: "PedingAppointments",
-  components: {AlertDialog: () => import("./AlertDialog")},
+  components: {
+    AlertDialog: () => import("./AlertDialog"),
+    SelecionarHorarioAgendamento: () => import('./SelecionarHorarioAgendamento')
+  },
   created() {
     this.FindAllAppointments();
   },
@@ -135,7 +148,8 @@ export default {
       Reasons: [],
       ShowAlert: false,
       Position: null,
-      Message: null
+      Message: null,
+      ShowDlgTranferencia: false
     };
   },
   computed: {
@@ -177,6 +191,13 @@ export default {
       this.Loading = false;
       this.Disable = false;
     },
+    /*AbrirDlgTranferenciaAgendamento() {
+      this.ShowDlgTranferencia = true
+      this.$store.commit('agendar/AlterarTipoItemAgendamento', val)
+      this.$store.commit('agendar/AlteraridItemAgendamento', val.value)
+      this.$store.commit('agendar/AlterarConvenio', this.ConvenioSelecionado.value)
+      this.$store.commit('agendar/AlterarMedico', val.value)
+    },*/
     OpenDialogCancelAppointment(appointment) {
       this.AppointmentSelectedForCancel = appointment;
       this.Show = true;

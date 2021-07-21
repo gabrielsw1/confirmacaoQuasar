@@ -50,6 +50,9 @@ export default {
     };
   },
   methods: {
+    AtivarLoading(boolean) {
+      this.$store.commit('global/AtivarLoading', boolean)
+    },
     async Agendar() {
       const idPaciente = localStorage.id
       const idAgendamento = this.$store.getters['agendar/BuscarIdAgendamentoSelecionado']
@@ -57,12 +60,11 @@ export default {
       const idCategoria = this.$store.getters['agendar/BuscarFiltrosAgendarHorarios'].idCategoria
 
       try {
-        this.$store.commit('agendar/AtivarLoading', true)
-        this.$store.dispatch('/agendar/AtivarLoading', true)
+        this.AtivarLoading(true)
         await this.$axios.post(
           `/agendamentos/agendar`, {idPaciente, idAgendamento, idConvenio, idCategoria}
         );
-        this.$store.commit('agendar/AtivarLoading', false)
+        this.AtivarLoading(false)
         this.OpenAlertDialog(
           "bottom",
           "bg-green text-white",
@@ -83,8 +85,8 @@ export default {
       this.Message = message;
       this.ShowAlert = true;
       setTimeout(() => {
-        this.ShowAlert = false;
         this.$router.go(0)
+        this.ShowAlert = false;
       }, 2000);
     },
   },
