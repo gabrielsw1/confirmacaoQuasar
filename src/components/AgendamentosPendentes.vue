@@ -36,7 +36,7 @@
               <div class="row">
                 <div class="row col-12 q-mr-xs justify-center">
                   <span class="text-light-blue-9 text-bold">
-                    {{ appointment.descrProcedimento || appointment.descrEspecialidade || 'Não informado' }}
+                    {{ appointment.descrItemAgendamento || 'Não informado' }}
                   </span>
                 </div>
                 <div class="col-auto q-mr-xs" v-if="appointment.dtAgendamento">
@@ -105,13 +105,13 @@
 
     <!-- Dialogo de transferencia do agendamento -->
     <q-dialog v-model="ShowDlgTranferencia" persistent>
-      <q-card>
+      <q-card style="width: 100%">
         <q-card-section class="row items-center">
-            <SelecionarHorarioAgendamento/>
+          <SelecionarHorarioAgendamento transferencia="true"/>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Voltar" color="primary" v-close-popup/>
-          <q-btn label="Transferir" color="primary" v-close-popup :disable="DisableButton"/>
+          <q-btn label="Transferir" @click="Transferir" color="primary" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -149,7 +149,8 @@ export default {
       ShowAlert: false,
       Position: null,
       Message: null,
-      ShowDlgTranferencia: false
+      ShowDlgTranferencia: false,
+      idAgendamentoTranferencia: null
     };
   },
   computed: {
@@ -191,13 +192,33 @@ export default {
       this.Loading = false;
       this.Disable = false;
     },
-    /*AbrirDlgTranferenciaAgendamento() {
+    AbrirDlgTranferenciaAgendamento(appointment) {
+      this.idAgendamentoTranferencia = appointment.idAgendamento
+      this.$store.commit('agendar/AlterarTipoItemAgendamento', appointment.tipo)
+      this.$store.commit('agendar/AlteraridItemAgendamento', appointment.idItemAgendamento)
+      this.$store.commit('agendar/AlterarConvenio', appointment.idConvenio)
+      this.$store.commit('agendar/AlterarMedico', appointment.idPrestador || null)
       this.ShowDlgTranferencia = true
-      this.$store.commit('agendar/AlterarTipoItemAgendamento', val)
-      this.$store.commit('agendar/AlteraridItemAgendamento', val.value)
-      this.$store.commit('agendar/AlterarConvenio', this.ConvenioSelecionado.value)
-      this.$store.commit('agendar/AlterarMedico', val.value)
-    },*/
+    },
+    async Transferir() {
+      const idAgendamentoOrigem = this.idAgendamentoTranferencia
+      const idAgendamentoDestino = this.$store.getters['agendar/BuscarIdAgendamentoSelecionado']
+      try {
+        await this.$axios.post("/agendamentos/transferir", {idAgendamentoOrigem, idAgendamentoDestino});
+        this.OpenAlertDialog(
+          "bottom",
+          "bg-green text-white",
+          "Agendamento transferido com sucesso"
+        );
+      } catch (error) {
+        console.log(error);
+        this.OpenAlertDialog(
+          "bottom",
+          "bg-red text-white",
+          "Erro ao transferir o agendamento"
+        );
+      }
+    },
     OpenDialogCancelAppointment(appointment) {
       this.AppointmentSelectedForCancel = appointment;
       this.Show = true;

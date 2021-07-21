@@ -1,18 +1,18 @@
 <template>
   <div class="row q-col-gutter-sm" style="width: 100%">
 
-    <div v-if="$q.screen.md" class="q-gutter-sm col-auto col-sm-3">
+    <div v-if="$q.screen.md && !transferencia" class="q-gutter-sm col-auto col-sm-3">
       <q-date class="shadow-3" v-model="DataSelecionada" color="light-blue-9"
               :subtitle="'Primeiro dia disponível: ' + Options[0].split('/').reverse().join('/')" today-btn
               :options="Options"></q-date>
     </div>
     <!-- Calendario -->
-    <div v-else class="col-12 col-sm-3">
+    <div v-else class="col-12 col-sm-12">
       <q-input dense v-model="DataSelecionada" readonly>
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer" color="light-blue-9">
             <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-              <q-date  landscape v-model="DataSelecionada" color="light-blue-9"
+              <q-date landscape v-model="DataSelecionada" color="light-blue-9"
                       :subtitle="'Primeiro dia disponível: ' + Options[0].split('/').reverse().join('/')"
                       :options="Options" mask="DD/MM/YYYY">
                 <div class="row items-center justify-end">
@@ -24,7 +24,7 @@
         </template>
       </q-input>
     </div>
-    <div class="q-gutter-sm col-auto col-sm-9" v-if="HorarioConfirmado">
+    <div :class = "transferencia ? 'q-gutter-sm col-auto col-sm-12' : 'q-gutter-sm col-auto col-sm-9'" v-if="HorarioConfirmado">
       <q-card class="shadow-3">
         <q-card-section class="bg-light-blue-9">
           <div class="text-h6 text-white">Informações do Agendamento</div>
@@ -32,7 +32,7 @@
         <q-separator/>
         <q-card-section>
           <div class="row q-col-gutter-sm" style="width: 100%">
-            <div class="col-12 col-sm-2">
+            <div v-if="!transferencia" class="col-12 col-sm-2">
               <q-input readonly outlined standout="bg-blue text-white" dense label="Data"
                        v-model="HorarioConfirmado.dtAgendamento"/>
             </div>
@@ -110,6 +110,16 @@
 
 export default {
   name: "SelecionarHorarioAgendamento",
+  props: {
+    transferencia: {
+      type: Boolean,
+      default: false
+    },
+    agendamentoOrigem: {
+      type: Object,
+      default: null
+    }
+  },
   data() {
     return {
       DataSelecionada: '',

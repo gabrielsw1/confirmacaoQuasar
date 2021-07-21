@@ -7,40 +7,54 @@ router.get('/consultaAgendamentos/:id', (req, res) => {
     const client = await db.pool.connect()
     try {
       const agendamentos = await client.query(
-        `SELECT
-                    agend.id_agendamento                               AS "idAgendamento",
-                    p.id_paciente                                      AS "idPaciente",
-					          p.nm_paciente                                      AS "nmPaciente",
-                    TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "dtAgendamento",
-                    TO_CHAR(agend.hora_atend_iten_agen, 'HH:MM')       AS "hrAgendamento",
-                    proc.descr_red_proc                                AS "descrProcedimento",
-                    esp.nm_especialidade                               AS "descrEspecialidade",
-                    agend.obs_resp_pag                                 AS "observacaoAgendamento",
-                    conv.nm_fantasia                                   AS "nmConvenio",
-                    cat.nm_categoria                                   AS "nmCategoria",
-                    prest.nm_prestador                                 AS "nmPrestador",
-                    h.nome                                             AS "nmHospital",
-                    l.logradouro || ', ' || h.numero                   AS "logradouro"
-                    FROM
-                        sigh.agendas ag
-                    LEFT JOIN sigh.agendamentos agend ON
-                        agend.cod_agenda = ag.id_agenda
-                    LEFT JOIN sigh.especialidades_principais esp ON
-                        ag.cod_especialidade = esp.id_esp_principal
-                    LEFT JOIN sigh.convenios conv ON
-                        conv.id_convenio = agend.cod_convenio
-                    LEFT JOIN sigh.categorias cat ON
-                        cat.id_categoria = agend.cod_categoria
-                    LEFT JOIN sigh.pacientes p ON
-                        p.id_paciente = agend.cod_paciente
-                    LEFT JOIN sigh.prestadores prest ON
-                        prest.id_prestador = agend.cod_medico
-                    INNER JOIN sigh.hospitais h ON
-                        h.id_hospital = ag.cod_hospital
-                    LEFT JOIN endereco_sigh.logradouros l ON
-                        l.id_logradouro = h.cod_logradouro
-                    left JOIN sigh.procedimentos proc ON
-                        proc.id_procedimento = ag.cod_exame
+        `SELECT agend.id_agendamento                               AS "idAgendamento",
+                                 p.id_paciente                                      AS "idPaciente",
+                                 p.nm_paciente                                      AS "nmPaciente",
+                                 TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "dtAgendamento",
+                                 TO_CHAR(agend.hora_atend_iten_agen, 'HH24:MM')       AS "hrAgendamento",
+                                 (case ta.tipo_agendamento
+                                      when 2 then 'consulta'
+                                      when 3 then 'exame'
+                                     end)                                           AS "tipo",
+                                 (case ta.tipo_agendamento
+                                      when 2 then esp.id_esp_principal
+                                      when 3 then proc.id_procedimento
+                                     end)                                           AS "idItemAgendamento",
+                                 (case ta.tipo_agendamento
+                                      when 2 then esp.nm_especialidade
+                                      when 3 then proc.descr_red_proc
+                                     end)                                           AS "descrItemAgendamento",
+                                 proc.descr_red_proc                                AS "descrProcedimento",
+                                 esp.nm_especialidade                               AS "descrEspecialidade",
+                                 agend.obs_resp_pag                                 AS "observacaoAgendamento",
+                                 conv.id_convenio                                   AS "idConvenio",
+                                 conv.nm_fantasia                                   AS "nmConvenio",
+                                 cat.nm_categoria                                   AS "nmCategoria",
+                                 prest.nm_prestador                                 AS "nmPrestador",
+                                 prest.id_prestador                                 AS "idPrestador",
+                                 h.nome                                             AS "nmHospital",
+                                 l.logradouro || ', ' || h.numero                   AS "logradouro"
+                          FROM sigh.agendas ag
+                                   LEFT JOIN sigh.agendamentos agend ON
+                              agend.cod_agenda = ag.id_agenda
+                                   LEFT JOIN sigh.tipos_agendamentos ta ON
+                              ta.id_tp_agendamento = ag.cod_tp_agendamento
+                                   LEFT JOIN sigh.especialidades_principais esp ON
+                              ag.cod_especialidade = esp.id_esp_principal
+                                   LEFT JOIN sigh.convenios conv ON
+                              conv.id_convenio = agend.cod_convenio
+                                   LEFT JOIN sigh.categorias cat ON
+                              cat.id_categoria = agend.cod_categoria
+                                   LEFT JOIN sigh.pacientes p ON
+                              p.id_paciente = agend.cod_paciente
+                                   LEFT JOIN sigh.prestadores prest ON
+                              prest.id_prestador = agend.cod_medico
+                                   INNER JOIN sigh.hospitais h ON
+                              h.id_hospital = ag.cod_hospital
+                                   LEFT JOIN endereco_sigh.logradouros l ON
+                              l.id_logradouro = h.cod_logradouro
+                                   left JOIN sigh.procedimentos proc ON
+                              proc.id_procedimento = ag.cod_exame
                     WHERE agend.cod_paciente = $1
                     AND ag.data_agenda >= current_date
                     and ag.agenda_web = true
@@ -276,4 +290,43 @@ router.post('/agendar', ((req, res) => {
   })
 }))
 
+router.post('/transferir', ((req, res) => {
+  (async () => {
+    const client = await db.pool.connect()
+    try {
+      console.log(req.body)
+      const {idAgendamentoOrigem, idAgendamentoDestino} = req.body
+      const horaAtendimentoDestino = await client.query(
+        `SELECT
+                            hora_atend_iten_agen,
+                            cod_agenda
+                         FROM sigh.agendamentos
+                         WHERE id_agendamento = $1`, [idAgendamentoDestino])
+
+      console.log(`SELECT sigh.f_transf_agendamento(
+                            ${idAgendamentoOrigem},
+                            ${idAgendamentoDestino},
+                            ${horaAtendimentoDestino.rows[0].cod_agenda},
+                            '${horaAtendimentoDestino.rows[0].hora_atend_iten_agen}',4,1,'N')`)
+
+      await client.query(
+        `SELECT sigh.f_transf_agendamento(
+                            ${idAgendamentoOrigem},
+                            ${idAgendamentoDestino},
+                            ${horaAtendimentoDestino.rows[0].cod_agenda},
+                            '${horaAtendimentoDestino.rows[0].hora_atend_iten_agen}',4,1,'N')`)
+      res.status(200).json('ok')
+    } finally {
+      client.release()
+    }
+  })().catch((e) => {
+    console.log(e)
+    res.status(400).json(e)
+  })
+}))
+
 module.exports = router
+
+
+
+
