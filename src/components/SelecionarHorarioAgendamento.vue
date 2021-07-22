@@ -32,7 +32,7 @@
         <q-separator/>
         <q-card-section>
           <div class="row q-col-gutter-sm" style="width: 100%">
-            <div v-if="!transferencia" class="col-12 col-sm-2">
+            <div class="col-12 col-sm-2">
               <q-input readonly outlined standout="bg-blue text-white" dense label="Data"
                        v-model="HorarioConfirmado.dtAgendamento"/>
             </div>

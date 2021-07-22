@@ -167,8 +167,8 @@ export default {
     }
   },
   methods: {
-    CommitAppointmentLoading(val) {
-      this.$store.commit("appointments/ActiveLoading", val);
+    AtivarLoading(boolean) {
+      this.$store.commit('global/AtivarLoading', boolean)
     },
     OpenAlertDialog(position, bgclass, message) {
       this.Position = position;
@@ -201,6 +201,7 @@ export default {
       this.ShowDlgTranferencia = true
     },
     async Transferir() {
+      this.AtivarLoading(true)
       const idAgendamentoOrigem = this.idAgendamentoTranferencia
       const idAgendamentoDestino = this.$store.getters['agendar/BuscarIdAgendamentoSelecionado']
       try {
@@ -210,6 +211,8 @@ export default {
           "bg-green text-white",
           "Agendamento transferido com sucesso"
         );
+        this.AtivarLoading(false)
+        this.FindAllAppointments();
       } catch (error) {
         console.log(error);
         this.OpenAlertDialog(
@@ -248,9 +251,9 @@ export default {
     async FindAllReasons() {
       try {
         this.DisableAndLoadingActive();
-        const {data} = await this.$axios.get(
-          "/agendamentos/motivos/Cancelamentos"
-        );
+        this.AtivarLoading(true)
+        const {data} = await this.$axios.get("/agendamentos/motivos/Cancelamentos");
+        this.AtivarLoading(false)
         this.Reasons = [...data];
         this.DisableAndLoadingInative();
       } catch (error) {
@@ -264,13 +267,11 @@ export default {
     },
     async FindAllAppointments() {
       try {
-        this.CommitAppointmentLoading(true);
+        this.AtivarLoading(true)
         this.Appointments = [];
-        const {data} = await this.$axios.get(
-          `/agendamentos/consultaAgendamentos/${localStorage.id}`
-        );
+        const {data} = await this.$axios.get(`/agendamentos/consultaAgendamentos/${localStorage.id}`);
         this.Appointments = [...data];
-        this.CommitAppointmentLoading(false);
+        this.AtivarLoading(false)
       } catch (error) {
         console.log(error);
         this.OpenAlertDialog(

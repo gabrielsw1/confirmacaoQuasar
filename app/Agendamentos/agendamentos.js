@@ -11,7 +11,7 @@ router.get('/consultaAgendamentos/:id', (req, res) => {
                                  p.id_paciente                                      AS "idPaciente",
                                  p.nm_paciente                                      AS "nmPaciente",
                                  TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "dtAgendamento",
-                                 TO_CHAR(agend.hora_atend_iten_agen, 'HH24:MM')       AS "hrAgendamento",
+                                 TO_CHAR(agend.hora_atend_iten_agen, 'HH24:MI')       AS "hrAgendamento",
                                  (case ta.tipo_agendamento
                                       when 2 then 'consulta'
                                       when 3 then 'exame'
@@ -302,12 +302,6 @@ router.post('/transferir', ((req, res) => {
                             cod_agenda
                          FROM sigh.agendamentos
                          WHERE id_agendamento = $1`, [idAgendamentoDestino])
-
-      console.log(`SELECT sigh.f_transf_agendamento(
-                            ${idAgendamentoOrigem},
-                            ${idAgendamentoDestino},
-                            ${horaAtendimentoDestino.rows[0].cod_agenda},
-                            '${horaAtendimentoDestino.rows[0].hora_atend_iten_agen}',4,1,'N')`)
 
       await client.query(
         `SELECT sigh.f_transf_agendamento(
