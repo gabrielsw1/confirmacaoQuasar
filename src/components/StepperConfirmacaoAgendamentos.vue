@@ -5,7 +5,8 @@
         <PendingAppointments/>
 
         <q-stepper-navigation>
-          <q-btn @click="step += 1" color="primary" label="Continuar"/>
+          <q-btn @click="step += 1" color="primary" label="Continuar"
+                 :disable="this.$store.getters['appointments/GetCountAppointmentsSelected'] ? false : true"/>
         </q-stepper-navigation>
       </q-step>
 

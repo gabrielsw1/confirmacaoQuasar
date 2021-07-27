@@ -15,9 +15,9 @@
 
         <SelecionarHorarioAgendamento/>
 
-        <q-stepper-navigation>
+        <q-stepper-navigation >
           <q-btn flat @click="step -= 1" color="primary" label="Voltar" class="q-ml-sm"/>
-          <q-btn @click="Agendar" color="primary" label="Agendar"
+          <q-btn  @click="Agendar" color="primary" label="Agendar" icon-right="check"
                  :disable="this.$store.getters['agendar/HabilitarBotaoAgendar']"/>
         </q-stepper-navigation>
       </q-step>

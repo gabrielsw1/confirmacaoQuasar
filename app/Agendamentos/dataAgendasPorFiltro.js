@@ -23,13 +23,14 @@ router.get('/agendas/:tipo/:idItemAgendamento/:idConvenio/:idMedico', (req, res)
                               and a.data_agenda >= current_date
                               and ta.codigo_tp_agendamento = '3'
                               and a.cod_exame is not null
-                              and coalesce((select count(*)
+                              and (coalesce((select count(*)
                                             from sigh.agendamentos
                                             where cod_agenda = a.id_agenda
                                               and data_atend_iten_agend >= current_date
                                               and (cod_paciente is null and nm_paciente is null)
                                               and ativo
-                                              and (bloqueado = false and fechado = 'A')), 0) > 0
+                                              and (bloqueado = false and fechado = 'A')), 0) > 0)
+                              and cast((a.data_agenda || ' ' || ag.hora_atend_iten_agen)as timestamp ) > current_timestamp
                             order by 2`, [req.params.idConvenio, req.params.idItemAgendamento])
         res.status(200).json(rows)
       } else if (req.params.tipo == 'consulta' && !req.query.data) {
@@ -56,7 +57,8 @@ router.get('/agendas/:tipo/:idItemAgendamento/:idConvenio/:idMedico', (req, res)
                                               and data_atend_iten_agend >= current_date
                                               and (cod_paciente is null and nm_paciente is null)
                                               and ativo
-                                              and (bloqueado = false and fechado = 'A')), 0) > 0)` + filtroMedico + ' order by 2', [req.params.idConvenio, req.params.idItemAgendamento])
+                                              and (bloqueado = false and fechado = 'A')), 0) > 0)
+                              and cast((a.data_agenda || ' ' || ag.hora_atend_iten_agen) as timestamp ) > current_timestamp ` + filtroMedico + ' order by 2', [req.params.idConvenio, req.params.idItemAgendamento])
         res.status(200).json(rows)
       } else if (req.query.data && req.params.tipo == 'exame') {
         const {rows} = await client.query(
@@ -92,20 +94,19 @@ router.get('/agendas/:tipo/:idItemAgendamento/:idConvenio/:idMedico', (req, res)
                               and ac.cod_convenio = $1
                               and ta.codigo_tp_agendamento = '3'
                               and a.cod_exame is not null
-                              and coalesce((select count(*)
+                              and (coalesce((select count(*)
                                             from sigh.agendamentos
                                             where cod_agenda = a.id_agenda
                                               and data_atend_iten_agend >= current_date
                                               and (cod_paciente is null and nm_paciente is null)
                                               and ativo
-                                              and (bloqueado = false and fechado = 'A')), 0) > 0
+                                              and (bloqueado = false and fechado = 'A')), 0) > 0)
+                              and cast((a.data_agenda || ' ' || ag.hora_atend_iten_agen)as timestamp ) > current_timestamp
                             order by 2`, [req.params.idConvenio, req.params.idItemAgendamento, req.query.data])
         res.status(200).json(rows)
       } else if (req.query.data || req.params.tipo == 'consulta') {
         const filtroMedico = req.params.idMedico && req.params.idMedico != 0 ? ` and a.cod_medico = ${req.params.idMedico}` : ''
 
-        console.log(req.params)
-        console.log(req.query)
         const {rows} = await client.query(
           `select distinct ag.id_agendamento                                                               as "value"
                                         , (to_char(ag.hora_atend_iten_agen, 'HH24:MI') || ' - ' || prest.nm_prestador)      as "label"
@@ -145,7 +146,8 @@ router.get('/agendas/:tipo/:idItemAgendamento/:idConvenio/:idMedico', (req, res)
                                               and data_atend_iten_agend >= current_date
                                               and (cod_paciente is null and nm_paciente is null)
                                               and ativo
-                                              and (bloqueado = false and fechado = 'A')), 0) > 0)` + filtroMedico + ' order by 2', [req.params.idConvenio, req.params.idItemAgendamento, req.query.data])
+                                              and (bloqueado = false and fechado = 'A')), 0) > 0)
+                              and cast((a.data_agenda || ' ' || ag.hora_atend_iten_agen) as timestamp ) > current_timestamp ` + filtroMedico + ' order by 2', [req.params.idConvenio, req.params.idItemAgendamento, req.query.data])
         res.status(200).json(rows)
       }
 

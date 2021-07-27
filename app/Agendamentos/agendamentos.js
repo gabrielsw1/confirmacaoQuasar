@@ -17,7 +17,7 @@ async function main(object, html) {
     secure: false,
     auth: {
       user: 'gabriel.luz@mv.com.br',
-      pass: 'Hackerworld.2022',
+      pass: 'Matriz@2022',
     },
   });
 

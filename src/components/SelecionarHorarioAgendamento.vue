@@ -90,7 +90,7 @@
         </div>
 
         <q-card-actions align="right">
-          <q-btn label="Cancelar" flat color="primary" v-close-popup/>
+          <q-btn label="Cancelar" flat color="primary" v-close-popup @click="DataSelecionada = null"/>
           <q-btn label="Confirmar" color="primary" v-close-popup :disabled="!HorarioSelecionado"
                  @click="HorarioConfirmado = HorarioSelecionado"/>
         </q-card-actions>
