@@ -61,9 +61,7 @@ export default {
 
       try {
         this.AtivarLoading(true)
-        await this.$axios.post(
-          `/agendamentos/agendar`, {idPaciente, idAgendamento, idConvenio, idCategoria}
-        );
+        await this.$axios.post(`/agendamentos/agendar`, {idPaciente, idAgendamento, idConvenio, idCategoria});
         this.AtivarLoading(false)
         this.OpenAlertDialog(
           "bottom",
@@ -85,7 +83,7 @@ export default {
       this.Message = message;
       this.ShowAlert = true;
       setTimeout(() => {
-        this.$router.go(0)
+        window.location.reload()
         this.ShowAlert = false;
       }, 2000);
     },

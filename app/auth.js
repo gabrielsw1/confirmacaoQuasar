@@ -30,8 +30,8 @@ module.exports = function (passport) {
 
   passport.deserializeUser(async (id, done) => {
     const client = await db.pool.connect()
-    client.query(`select * from sigh.pacientes where id_paciente = ${id}`).then(user => {
-      done(err, user)
+    client.query(`select * from sigh.pacientes where id_paciente = ${id.id_paciente}`).then(user => {
+      done(null, user)
     }).catch(e => console.log(e))
   })
 }

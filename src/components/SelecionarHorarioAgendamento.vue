@@ -3,8 +3,9 @@
 
     <div v-if="$q.screen.md && !transferencia" class="q-gutter-sm col-auto col-sm-3">
       <q-date class="shadow-3" v-model="DataSelecionada" color="light-blue-9"
-              :subtitle="'Primeiro dia disponível: ' + Options[0].split('/').reverse().join('/')" today-btn
-              :options="Options"></q-date>
+              :subtitle="DataSelecionada ? `Primeiro dia disponível:  ${Options[0].split('/').reverse().join('/')}` : null"
+              today-btn
+              :options="Options" :events="Options"></q-date>
     </div>
     <!-- Calendario -->
     <div v-else class="col-12 col-sm-12">
@@ -12,19 +13,17 @@
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer" color="light-blue-9">
             <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-              <q-date landscape v-model="DataSelecionada" color="light-blue-9"
-                      :subtitle="'Primeiro dia disponível: ' + Options[0].split('/').reverse().join('/')"
-                      :options="Options" mask="DD/MM/YYYY">
-                <div class="row items-center justify-end">
-                  <q-btn v-close-popup label="Fechar" color="primary" flat/>
-                </div>
+              <q-date landscape v-model="DataSelecionada" color="light-blue-9" :events="Options"
+                      :subtitle="DataSelecionada ? `Primeiro dia disponível:  ${Options[0].split('/').reverse().join('/')}` : null"
+                      :options="Options" mask="DD/MM/YYYY" v-close-popup>
               </q-date>
             </q-popup-proxy>
           </q-icon>
         </template>
       </q-input>
     </div>
-    <div :class = "transferencia ? 'q-gutter-sm col-auto col-sm-12' : 'q-gutter-sm col-auto col-sm-9'" v-if="HorarioConfirmado">
+    <div :class="transferencia ? 'q-gutter-sm col-auto col-sm-12' : 'q-gutter-sm col-auto col-sm-9'"
+         v-if="HorarioConfirmado">
       <q-card class="shadow-3">
         <q-card-section class="bg-light-blue-9">
           <div class="text-h6 text-white">Informações do Agendamento</div>
@@ -75,11 +74,14 @@
     </div>
 
 
-    <q-dialog v-model="Show" persistent>
+    <q-dialog v-model="Show" persistent v-if="DataSelecionada">
       <q-card>
         <q-card-section class="row items-center">
           <span class="q-ml-sm">Selecione o horário que deseja agendar na data:
-            <b>{{ DataSelecionada ? DataSelecionada.split('/').reverse().join('/') : 'ERROR' }}</b> </span>
+            <b>{{
+                DataSelecionada && !$q.platform.is.mobile ? DataSelecionada.split('/').reverse().join('/') : DataSelecionada
+              }}</b>
+          </span>
         </q-card-section>
 
         <div class="q-mx-lg">

@@ -107,11 +107,11 @@
     <q-dialog v-model="ShowDlgTranferencia" persistent>
       <q-card style="width: 100%">
         <q-card-section class="row items-center">
-          <SelecionarHorarioAgendamento transferencia="true"/>
+          <SelecionarHorarioAgendamento :transferencia="true"/>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Voltar" color="primary" v-close-popup/>
-          <q-btn label="Transferir" @click="Transferir" color="primary" v-close-popup/>
+          <q-btn label="Transferir" @click="Transferir" color="primary" v-close-popup :disable="this.$store.getters['agendar/HabilitarBotaoAgendar']"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

@@ -16,21 +16,26 @@ const Prestador = require('./Agendamentos/prestadorPorConvenio')
 const DataAgendasPorFiltro = require('./Agendamentos/dataAgendasPorFiltro')
 const Pacientes = require('./Pacientes/pacientes')
 
+
+
 //Declaração de Variaveis
 const app = express()
 const port = 8587
-
+app.use(cors({origin: true, credentials: true}))
 //import passport
 const passport = require('passport')
 const session = require('express-session')
 require('./auth')(passport)
 
+
+
+app.use(express.static('public'));
 // Regras de Uso Geral
 app.use(bodyParser.urlencoded({
   extended: false
 }))
 app.use(bodyParser.json());
-app.use(cors({origin: true, credentials: true}))
+
 
 //Configuracoes Sessao
 app.use(session({

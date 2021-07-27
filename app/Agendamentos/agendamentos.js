@@ -1,6 +1,36 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../dbConnect')
+const nodemailer = require("nodemailer");
+
+
+async function main(object, html) {
+
+  let {
+    subject,
+    text,
+    to,
+  } = object
+  let transporter = nodemailer.createTransport({
+    host: "smtp.office365.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'gabriel.luz@mv.com.br',
+      pass: 'Hackerworld.2022',
+    },
+  });
+
+  let info = await transporter.sendMail({
+    from: `"Gabriel Moreno da Luz" <gabriel.luz@mv.com.br>`,
+    to: `${to}`,
+    subject,
+    text,
+    html,
+  });
+
+  console.log("Message sent: %s", info.messageId);
+}
 
 router.get('/consultaAgendamentos/:id', (req, res) => {
   (async () => {
@@ -124,9 +154,37 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
         return `${ano}-${mes}-${dia}`
       }
 
+      const {rows} = await client.query(`select
+                                                                 coalesce(h.nome_reduzido, h.nome)                                  as "clinica",
+                                                                 p.email                                                            as "to",
+                                                                 'Agendamento Cancelado'                                            as "subject",
+                                                                 'Agendamento Cancelado'                                            as "text",
+                                                                 p.nm_paciente                                                      as "paciente",
+                                                                 (l.tp_logradouro || ' ' || l.logradouro || ', ' || h.numero || ' - ' || l.bairro_inicial || ' - ' ||l.municipio) as "endereco",
+                                                                 (case tpagend.tipo_agendamento
+                                                                      when 2 then esp.nm_especialidade
+                                                                      when 3 then proc.descr_red_proc
+                                                                     end)                                                           as "itemAgendamento",
+                                                                 conv.nm_fantasia                                                   as "convenio",
+                                                                 coalesce(prest.nome_reduzido, prest.nm_prestador,'não informado')  as "medico",
+                                                                 TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "data",
+                                                                 TO_CHAR(agend.hora_atend_iten_agen, 'HH24:MI')     AS "hora"
+                                                          from sigh.agendamentos agend
+                                                                   inner join sigh.agendas ag on (ag.id_agenda = agend.cod_agenda)
+                                                                   left join sigh.hospitais h on (h.id_hospital = agend.cod_hospital)
+                                                                   left join sigh.convenios conv on (conv.id_convenio = agend.cod_convenio)
+                                                                   left join sigh.pacientes p on (p.id_paciente = agend.cod_paciente)
+                                                                   left join sigh.prestadores prest on (prest.id_prestador = agend.cod_medico)
+                                                                   left join sigh.tipos_agendamentos tpagend on (tpagend.id_tp_agendamento = ag.cod_tp_agendamento)
+                                                                   left join sigh.procedimentos proc on (proc.id_procedimento = ag.cod_exame)
+                                                                   left join endereco_sigh.logradouros l on (l.id_logradouro = h.cod_logradouro)
+                                                                   left join sigh.especialidades_principais esp
+                                                                             on (esp.id_esp_principal = ag.cod_especialidade)
+                                                          where agend.id_agendamento = $1`, [req.params.idHorario])
 
       let agendamentoOriginal = await client.query(`select * from sigh.agendamentos where id_agendamento = ${req.params.idHorario}`)
       agendamentoOriginal = agendamentoOriginal.rows
+
       await client.query(`update
                                        sigh.agendamentos
                                     set
@@ -176,8 +234,6 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                    where
                                         id_agendamento = ${agendamentoOriginal[0].id_agendamento}`)
 
-
-      //Gera o novo registro na agenda com o motivo agendamento
       await client.query(`
                                             insert into
                                             sigh.agendamentos_desistencias (
@@ -260,13 +316,54 @@ router.delete('/cancelar/:idHorario/:motivoCancelamento', (req, res) => {
                                             , ${agendamentoOriginal[0].cod_prescricao}
                                             , ${agendamentoOriginal[0].cod_agendamento_integracao_ag}
                                             , ${req.params.motivoCancelamento})`)
+
+      const motivo = await client.query(`select
+                                                descr_motivo_cancelamento  as "motivo"
+                                            from sigh.motivos_cancelamentos
+                                            where
+                                            id_motivo_cancelamento = $1`, [req.params.motivoCancelamento])
+
+      const html = `<body>
+                      <div style="box-shadow: #9e9e9e 1px 1px 12px;
+                              padding: 10px;
+                              width: 100%;
+                              border-radius: 5px;
+                              display: flex;
+                              flex-direction: column;
+                              justify-content: center;
+                              align-items: center;
+                              max-width: 400px;
+                              font-family: 'Calibri Light'">
+                      <div style="text-align: center;
+                              width: 100%;
+                              flex-direction: column">
+                      <div style="width: 100%;">
+                          <p style="font-size: 24px; color: #1976D2; margin-bottom: 0px;"><b>${rows[0].clinica}</b></p>
+                      </div>
+                      <div style="width: 100%;">
+                          <p style="margin-top: 0px; width: 100%;">${rows[0].endereco}</p>
+                      </div>
+                      <div style="width: 100%;">
+                          <p style="font-size: 18px; margin-top: 5px; color: #D32F2F; width: 100%;"><b>${rows[0].subject}</b></p>
+                      </div>
+                  </div>
+                  <div style="width: 100%;">
+                      <p> Olá <b>${rows[0].paciente}</b> , está é sua confirmação de cancelamento na <b>${rows[0].clinica}</p>
+                      <p><b>Item Cancelado: </b>${rows[0].itemAgendamento} </p>
+                      <p><b>Motivo: </b>${motivo.rows[0].motivo} </p>
+                      <p><b>Data: </b>${rows[0].data}</p>
+                      <p><b>Hora: </b>${rows[0].hora}</p>
+                  </div>
+
+              </div>
+              </body>`
+      main(rows[0], html).catch(console.error)
       res.status(200).json("OK")
 
     } finally {
       client.release()
     }
   })().catch((e) => {
-    console.log(e)
     res.status(417).json({
       error: e
     })
@@ -278,8 +375,82 @@ router.post('/agendar', ((req, res) => {
     const client = await db.pool.connect()
     try {
       const {idPaciente, idAgendamento, idConvenio, idCategoria} = req.body
-      const {rows} = await client.query('' +
-        'update sigh.agendamentos set cod_paciente = $1, cod_convenio = $3, cod_categoria = $4 where id_agendamento = $2', [parseInt(idPaciente), idAgendamento, idConvenio, idCategoria])
+      await client.query('' +
+        `update sigh.agendamentos
+         set cod_paciente = $1,
+         cod_convenio = $3,
+         cod_categoria = $4
+         where id_agendamento = $2`,
+        [parseInt(idPaciente), idAgendamento, idConvenio, idCategoria])
+
+      const {rows} = await client.query(`select
+                                                                 coalesce(h.nome_reduzido, h.nome)                                  as "clinica",
+                                                                 p.email                                                            as "to",
+                                                                 'Agendamento Realizado'                                            as "subject",
+                                                                 'Agendamento Realizado'                                            as "text",
+                                                                 p.nm_paciente                                                      as "paciente",
+                                                                 (l.tp_logradouro || ' ' || l.logradouro || ', ' || h.numero || ' - ' || l.bairro_inicial || ' - ' ||
+                                                                  l.municipio)                                                      as "endereco",
+                                                                 (case tpagend.tipo_agendamento
+                                                                      when 2 then esp.nm_especialidade
+                                                                      when 3 then proc.descr_red_proc
+                                                                     end)                                                           as "itemAgendamento",
+                                                                 conv.nm_fantasia                                                   as "convenio",
+                                                                 coalesce(prest.nome_reduzido, prest.nm_prestador,'não informado')  as "medico",
+                                                                 TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "data",
+                                                                 TO_CHAR(agend.hora_atend_iten_agen, 'HH24:MI')     AS "hora",
+                                                                 coalesce(orientacoes_internacao,'Não possui preparo')             as "preparo"
+                                                          from sigh.agendamentos agend
+                                                                   inner join sigh.agendas ag on (ag.id_agenda = agend.cod_agenda)
+                                                                   left join sigh.hospitais h on (h.id_hospital = agend.cod_hospital)
+                                                                   left join sigh.convenios conv on (conv.id_convenio = agend.cod_convenio)
+                                                                   left join sigh.pacientes p on (p.id_paciente = agend.cod_paciente)
+                                                                   left join sigh.prestadores prest on (prest.id_prestador = agend.cod_medico)
+                                                                   left join sigh.tipos_agendamentos tpagend on (tpagend.id_tp_agendamento = ag.cod_tp_agendamento)
+                                                                   left join sigh.procedimentos proc on (proc.id_procedimento = ag.cod_exame)
+                                                                   left join endereco_sigh.logradouros l on (l.id_logradouro = h.cod_logradouro)
+                                                                   left join sigh.especialidades_principais esp
+                                                                             on (esp.id_esp_principal = ag.cod_especialidade)
+                                                          where agend.id_agendamento = $1`, [idAgendamento])
+
+
+      const html = `<body>
+                      <div style="box-shadow: #9e9e9e 1px 1px 12px;
+                              padding: 10px;
+                              width: 100%;
+                              border-radius: 5px;
+                              display: flex;
+                              flex-direction: column;
+                              justify-content: center;
+                              align-items: center;
+                              max-width: 400px;
+                              font-family: 'Calibri Light'">
+                      <div style="text-align: center;
+                              width: 100%;
+                              flex-direction: column">
+                      <div style="width: 100%;">
+                          <p style="font-size: 24px; color: #1976D2; margin-bottom: 0px;"><b>${rows[0].clinica}</b></p>
+                      </div>
+                      <div style="width: 100%;">
+                          <p style="margin-top: 0px; width: 100%;">${rows[0].endereco}</p>
+                      </div>
+                      <div style="width: 100%;">
+                          <p style="font-size: 18px; margin-top: 5px; color: #66BB6A; width: 100%;"><b>${rows[0].subject}</b></p>
+                      </div>
+                  </div>
+                  <div style="width: 100%;">
+                      <p> Olá <b>${rows[0].paciente}</b> , está é sua confirmação de agendamento na <b>${rows[0].clinica}</b>, realizado para o convênio <b>${rows[0].convenio}</b></p>
+                      <p><b>Item Agendado: </b>${rows[0].itemAgendamento}
+                      <p><b>Médico: </b>${rows[0].medico}
+                      <p><b>Data: </b>${rows[0].data}
+                      <p><b>Hora: </b>${rows[0].hora}
+                      <p><b>Preparo: </b>${rows[0].preparo}
+                  </div>
+
+              </div>
+              </body>`
+      main(rows[0], html).catch(console.error)
+
       res.status(200).json(rows)
     } finally {
       client.release()
@@ -309,6 +480,73 @@ router.post('/transferir', ((req, res) => {
                             ${idAgendamentoDestino},
                             ${horaAtendimentoDestino.rows[0].cod_agenda},
                             '${horaAtendimentoDestino.rows[0].hora_atend_iten_agen}',4,1,'N')`)
+
+      const {rows} = await client.query(`select
+                                                                 coalesce(h.nome_reduzido, h.nome)                                  as "clinica",
+                                                                 p.email                                                            as "to",
+                                                                 'Agendamento Transferido'                                          as "subject",
+                                                                 'Agendamento Transferido'                                          as "text",
+                                                                 p.nm_paciente                                                      as "paciente",
+                                                                 (l.tp_logradouro || ' ' || l.logradouro || ', ' || h.numero || ' - ' || l.bairro_inicial || ' - ' ||
+                                                                  l.municipio)                                                      as "endereco",
+                                                                 (case tpagend.tipo_agendamento
+                                                                      when 2 then esp.nm_especialidade
+                                                                      when 3 then proc.descr_red_proc
+                                                                     end)                                                           as "itemAgendamento",
+                                                                 conv.nm_fantasia                                                   as "convenio",
+                                                                 coalesce(prest.nome_reduzido, prest.nm_prestador,'não informado')  as "medico",
+                                                                 TO_CHAR(agend.data_atend_iten_agend, 'DD/MM/YYYY') AS "data",
+                                                                 TO_CHAR(agend.hora_atend_iten_agen, 'HH24:MI')     AS "hora",
+                                                                 coalesce(orientacoes_internacao,'Não possui preparo')             as "preparo"
+                                                          from sigh.agendamentos agend
+                                                                   inner join sigh.agendas ag on (ag.id_agenda = agend.cod_agenda)
+                                                                   left join sigh.hospitais h on (h.id_hospital = agend.cod_hospital)
+                                                                   left join sigh.convenios conv on (conv.id_convenio = agend.cod_convenio)
+                                                                   left join sigh.pacientes p on (p.id_paciente = agend.cod_paciente)
+                                                                   left join sigh.prestadores prest on (prest.id_prestador = agend.cod_medico)
+                                                                   left join sigh.tipos_agendamentos tpagend on (tpagend.id_tp_agendamento = ag.cod_tp_agendamento)
+                                                                   left join sigh.procedimentos proc on (proc.id_procedimento = ag.cod_exame)
+                                                                   left join endereco_sigh.logradouros l on (l.id_logradouro = h.cod_logradouro)
+                                                                   left join sigh.especialidades_principais esp
+                                                                             on (esp.id_esp_principal = ag.cod_especialidade)
+                                                          where agend.id_agendamento = $1`, [idAgendamentoDestino])
+
+      const html = `<body>
+                      <div style="box-shadow: #9e9e9e 1px 1px 12px;
+                              padding: 10px;
+                              width: 100%;
+                              border-radius: 5px;
+                              display: flex;
+                              flex-direction: column;
+                              justify-content: center;
+                              align-items: center;
+                              max-width: 400px;
+                              font-family: 'Calibri Light'">
+                      <div style="text-align: center;
+                              width: 100%;
+                              flex-direction: column">
+                      <div style="width: 100%;">
+                          <p style="font-size: 24px; color: #1976D2; margin-bottom: 0px;"><b>${rows[0].clinica}</b></p>
+                      </div>
+                      <div style="width: 100%;">
+                          <p style="margin-top: 0px; width: 100%;">${rows[0].endereco}</p>
+                      </div>
+                      <div style="width: 100%;">
+                          <p style="font-size: 18px; margin-top: 5px; color: #66BB6A; width: 100%;"><b>${rows[0].subject}</b></p>
+                      </div>
+                  </div>
+                  <div style="width: 100%;">
+                      <p> Olá <b>${rows[0].paciente}</b> , está é sua confirmação de transferencia de agendamento na <b>${rows[0].clinica}</b>, realizado para o convênio <b>${rows[0].convenio}</b></p>
+                      <p><b>Item Agendado: </b>${rows[0].itemAgendamento}
+                      <p><b>Médico: </b>${rows[0].medico}
+                      <p><b>Data: </b>${rows[0].data}
+                      <p><b>Hora: </b>${rows[0].hora}
+                      <p><b>Preparo: </b>${rows[0].preparo}
+                  </div>
+              </div>
+              </body>`
+      main(rows[0], html).catch(console.error)
+
       res.status(200).json('ok')
     } finally {
       client.release()
