@@ -41,7 +41,7 @@ export default {
     async buscarTotalAgendamentos() {
       this.loading = true
       const {data} = await this.$axios.get(
-        `/agendamentos/pendentes/total/${localStorage.id}`
+        `/agendamentoOnline/agendamentos/pendentes/total/${localStorage.id}`
       );
       this.totalAgendamentos = data[0].totalAgendamentosPendentes
       this.loading = false

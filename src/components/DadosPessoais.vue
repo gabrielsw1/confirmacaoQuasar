@@ -287,7 +287,7 @@ export default {
       try {
         this.AtivarLoading(true)
         this.loading = true;
-        const {data} = await this.$axios.get(`/pacientes/perfil/${localStorage.id}`);
+        const {data} = await this.$axios.get(`/agendamentoOnline/paciente/perfil/${localStorage.id}`);
         this.values = data.Endereco;
         this.paciente = data;
         this.loading = false;
@@ -300,7 +300,7 @@ export default {
     async DeleteEnd({id}) {
       try {
         this.AtivarLoading(true)
-        await this.$axios.delete(`pacientes/endereco/${id}`);
+        await this.$axios.delete(`/pacientes/endereco/${id}`);
         this.selected = [];
         this.findPersonalData();
         this.AtivarLoading(false)
@@ -333,10 +333,10 @@ export default {
     async SaveEnd() {
       try {
         /* Faz o post dos dados preenchidos pelo usuario na ROTA,a rota vai tratar se é para atualizar ou inserir um novo endereço. */
-        await this.$axios.post(`/pacientes/endereco/${localStorage.id}`, this.newEnd);
+        await this.$axios.post(`/agendamentoOnline/paciente/endereco/${localStorage.id}`, this.newEnd);
         /* Atualiza o GRID de Endereços após o retorno da rota. */
         this.loading = true;
-        const {data} = await this.$axios.get(`/pacientes/perfil/${localStorage.id}`);
+        const {data} = await this.$axios.get(`/agendamentoOnline/paciente/perfil/${localStorage.id}`);
         this.values = data.Endereco;
         this.loading = false;
         this.disableCEP = false;
@@ -351,7 +351,7 @@ export default {
       }
       this.loadingCep = true;
       try {
-        const {data} = await this.$axios.get(`/correios/consultaCEP/${this.newEnd.cep}`);
+        const {data} = await this.$axios.get(`/utils/correios/consultaCep/${this.newEnd.cep}`);
         const endereco = data.return.end.split(" ");
         endereco.splice(0, 1);
         this.newEnd.bairro = data.return.bairro;

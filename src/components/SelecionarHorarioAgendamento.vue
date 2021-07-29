@@ -164,7 +164,7 @@ export default {
       if (this.DataSelecionada) {
         this.Show = true
         this.AtivarLoading(true)
-        const {data} = await this.$axios.get(`/agendamentos/agendas/${this.Filtro.tipoItemAgendamento}/${this.Filtro.idItemAgendamento}/${this.Filtro.idConvenio}/${this.Filtro.idMedico || 0}/?data=${this.DataSelecionada.replaceAll('/', '-')}`);
+        const {data} = await this.$axios.get(`/agendamentoOnline/agendas/${this.Filtro.tipoItemAgendamento}/${this.Filtro.idItemAgendamento}/${this.Filtro.idConvenio}/${this.Filtro.idMedico || 0}/?data=${this.DataSelecionada.replaceAll('/', '-')}`);
         this.Horarios = data
         this.AtivarLoading(false)
         this.HorarioSelecionado = null
@@ -175,7 +175,7 @@ export default {
         this.AtivarLoading(true)
         const Medico = idMedico || 0
         this.LoadingConv = true
-        const {data} = await this.$axios.get(`/agendamentos/agendas/${tipo}/${idItemAgendamento}/${idConvenio}/${Medico}`);
+        const {data} = await this.$axios.get(`/agendamentoOnline/agendas/${tipo}/${idItemAgendamento}/${idConvenio}/${Medico}`);
         data.map(e => {
           this.Options.push(e.dtAgenda.replaceAll('-', '/').replace('/T(.)*Z', ''))
         })

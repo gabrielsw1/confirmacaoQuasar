@@ -206,7 +206,7 @@ export default {
       const idAgendamentoOrigem = this.idAgendamentoTranferencia
       const idAgendamentoDestino = this.$store.getters['agendar/BuscarIdAgendamentoSelecionado']
       try {
-        await this.$axios.post("/agendamentos/transferir", {idAgendamentoOrigem, idAgendamentoDestino});
+        await this.$axios.post("/agendamentoOnline/agendamentos/transferir", {idAgendamentoOrigem, idAgendamentoDestino});
         this.OpenAlertDialog(
           "bottom",
           "bg-green text-white",
@@ -231,7 +231,7 @@ export default {
     async CancelAppointment() {
       try {
         await this.$axios.delete(
-          `/agendamentos/cancelar/${this.AppointmentSelectedForCancel.idAgendamento}/${this.SelectedReason.value}`
+          `/agendamentoOnline/agendamentos/cancelar/${this.AppointmentSelectedForCancel.idAgendamento}/${this.SelectedReason.value}`
         );
         this.ResetAppontmentsAndReasons();
         this.OpenAlertDialog(
@@ -253,7 +253,7 @@ export default {
       try {
         this.DisableAndLoadingActive();
         this.AtivarLoading(true)
-        const {data} = await this.$axios.get("/agendamentos/motivos/Cancelamentos");
+        const {data} = await this.$axios.get("/motivos/cancelamentos");
         this.AtivarLoading(false)
         this.Reasons = [...data];
         this.DisableAndLoadingInative();
@@ -270,7 +270,7 @@ export default {
       try {
         this.AtivarLoading(true)
         this.Appointments = [];
-        const {data} = await this.$axios.get(`/agendamentos/consultaAgendamentos/${localStorage.id}`);
+        const {data} = await this.$axios.get(`/agendamentoOnline/agendamentos/pendentes/${localStorage.id}`);
         this.Appointments = [...data];
         this.AtivarLoading(false)
       } catch (error) {

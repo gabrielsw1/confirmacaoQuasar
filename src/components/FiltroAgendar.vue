@@ -139,7 +139,7 @@ export default {
     async BuscarMedicosPorConvenio(idItemAgendamento, idConvenio) {
       try {
         const {data} = await this.$axios.get(
-          `/agendamentos/prestador/${idItemAgendamento}/${idConvenio}`
+          `/agendamentoOnline/agendas/prestador/${idItemAgendamento}/${idConvenio}`
         );
         this.MedicosPorConvenio = [...data]
       } catch (e) {
@@ -154,9 +154,7 @@ export default {
       try {
         this.LoadingConv = true
         this.DisableConv = true
-        const {data} = await this.$axios.get(
-          `/agendamentos/convenios/${tipo}/${idItemAgendamento}`
-        );
+        const {data} = await this.$axios.get(`/agendamentoOnline/agendamentos/convenios/${tipo}/${idItemAgendamento}`);
         this.Convenios = [...data]
         this.LoadingConv = false
         this.DisableConv = false
@@ -172,7 +170,7 @@ export default {
       try {
         this.LoadingCat = true
         this.DisableCat = false
-        const {data} = await this.$axios.get(`/agendamentos/categorias/${idConvenio}`);
+        const {data} = await this.$axios.get(`/categorias/${idConvenio}`);
         this.Categorias = [...data]
         this.LoadingCat = false
         this.DisableCat = false
@@ -188,12 +186,12 @@ export default {
       try {
         if (this.TipoAgendamento === 'consulta') {
           this.Loading = true
-          const {data} = await this.$axios.get("/agendamentos/especialidades");
+          const {data} = await this.$axios.get("/agendamentoOnline/agendas/especialidadesDisponiveis");
           this.ItensAgendamentos = [...data]
           this.Loading = false
         } else {
           this.Loading = true
-          const {data} = await this.$axios.get("/agendamentos/exames");
+          const {data} = await this.$axios.get("/agendamentoOnline/agendas/examesDisponiveis");
           this.ItensAgendamentos = [...data]
           this.Loading = false
         }

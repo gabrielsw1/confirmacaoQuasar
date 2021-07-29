@@ -61,7 +61,7 @@ export default {
 
       try {
         this.AtivarLoading(true)
-        await this.$axios.post(`/agendamentos/agendar`, {idPaciente, idAgendamento, idConvenio, idCategoria});
+        await this.$axios.post(`/agendamentoOnline/agendamentos/agendar`, {idPaciente, idAgendamento, idConvenio, idCategoria});
         this.AtivarLoading(false)
         this.OpenAlertDialog(
           "bottom",
