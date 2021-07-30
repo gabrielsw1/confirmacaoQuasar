@@ -86,8 +86,14 @@ export default {
     };
   },
   methods: {
-    logout() {
-      this.$router.push("/");
+    async logout() {
+      try {
+
+        await this.$axios.get('/logout')
+        await this.$router.push("/");
+      } catch (e) {
+        console.log(e)
+      }
     }
   }
 };
