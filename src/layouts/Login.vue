@@ -9,12 +9,22 @@
                 <img alt="logo" src="../assets/logo.jpg"/>
               </div>
               <div class="col-12 q-ma-xs">
-                <q-input :rules="[ val => val && val.length > 0 || 'Informe o CPF ou E-mail']" dense rounded outlined
-                         label="Informe o CPF ou E-mail" v-model="Paciente.username"/>
+                <q-input :rules="[ val => val && val.length > 0 || 'Informe o CPF ou E-mail']" no-error-icon dense
+                         rounded outlined hide-bottom-space
+                         label="Informe o CPF ou E-mail" v-model="Paciente.username">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="person"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 q-ma-xs">
-                <q-input :rules="[ val => val && val.length > 0 || 'Informe a Senha']" type="password" dense rounded
-                         outlined label="Informe a senha" v-model="Paciente.password"/>
+                <q-input :rules="[ val => val && val.length > 0 || 'Informe a Senha']" no-error-icon type="password"
+                         dense rounded hide-bottom-space
+                         outlined label="Informe a senha" v-model="Paciente.password">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="lock"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 q-ma-xs flex justify-center">
                 <q-btn type="submit" :Loading="Loading" :disable="disable" class="full-width shadow-7" dense unelevated
@@ -36,51 +46,100 @@
     </template>
     <template v-else>
       <q-card class="shadow-7 card-style-2">
-        <div class="text-light-blue-9 text-h5 flex justify-center"><p>Cadastro</p></div>
+        <div class="text-light-blue-9 text-h5 flex justify-center">Preencha os dados e realize o seu cadastro.</div>
         <q-card-section>
           <form @submit.prevent="">
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-sm-6">
-                <q-input v-model="NewUser.nome" outlined standout="bg-blue text-white" dense label="Nome"/>
+                <q-input v-model="NewUser.nome" :rules="[ val => val && val.length > 0 || 'Informe seu nome.']"
+                         hide-bottom-space no-error-icon outlined standout="bg-blue text-white" dense label="Nome">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="person"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 col-sm-6">
-                <q-input v-model="NewUser.nomeSocial" outlined standout="bg-blue text-white" dense label="Nome Social"/>
+                <q-input v-model="NewUser.nomeSocial" hide-bottom-space outlined standout="bg-blue text-white"
+                         no-error-icon dense label="Nome Social">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="person"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 col-sm-3 ">
-                <q-select v-model="NewUser.sexo" outlined standout="bg-blue text-white" dense label="Sexo" :options="options"/>
+                <q-select v-model="NewUser.sexo" :rules="[ val => val && val.length > 0 || 'Informe seu sexo.']"
+                          no-error-icon hide-bottom-space outlined standout="bg-blue text-white" dense label="Sexo"
+                          :options="options"/>
               </div>
               <div class="col-12 col-sm-3 ">
-                <q-input v-model="NewUser.cpf" outlined standout="bg-blue text-white" dense label="CPF" mask="###.###.###-##"/>
+                <q-input v-model="NewUser.cpf" :rules="[ val => val && val.length > 0 || 'Informe seu CPF.']"
+                         no-error-icon hide-bottom-space outlined standout="bg-blue text-white" dense label="CPF"
+                         mask="###.###.###-##"/>
               </div>
               <div class="col-12 col-sm-3 ">
-                <q-input v-model="NewUser.dtNasc" type="date" outlined standout="bg-blue text-white" dense />
+                <q-input v-model="NewUser.dtNasc"
+                         :rules="[ val => val && val.length > 0 || 'Informe sua data de nascimento.']" no-error-icon
+                         hide-bottom-space label="Dt. Nasc." type="text" mask="##/##/####" outlined
+                         standout="bg-blue text-white" dense>
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="event"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 col-sm-3 ">
-                <q-input v-model="NewUser.cel" outlined standout="bg-blue text-white" dense label="Tel. Celular"/>
+                <q-input v-model="NewUser.cel" :rules="[ val => val && val.length > 0 || 'Informe o seu telefone.']"
+                         no-error-icon hide-bottom-space type="tel" outlined standout="bg-blue text-white" dense
+                         label="Tel. Celular">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="call"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 col-sm-6 ">
-                <q-input v-model="NewUser.email" type="email" outlined standout="bg-blue text-white" dense label="E-mail"/>
+                <q-input v-model="NewUser.email" type="email" outlined standout="bg-blue text-white" dense
+                         label="E-mail">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="mail"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 col-sm-6 ">
-                <q-input v-model="NewUser.confirmEmail" type="email" outlined standout="bg-blue text-white" dense label="Confirmação do E-mail"/>
+                <q-input v-model="NewUser.confirmEmail"
+                         :rules="[val => validadeEmail(val) || 'Os e-mails informados não conferem.']" no-error-icon
+                         hide-bottom-space type="email" outlined standout="bg-blue text-white" dense
+                         label="Confirmação do E-mail">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="mail"/>
+                  </template>
+                </q-input>
               </div>
               <div class="col-12 col-sm-6 ">
-                 <q-input v-model="NewUser.password" outlined standout="bg-blue text-white" dense :type="IsPwd ? 'password' : 'text'" label="Senha">
-                <template v-slot:append>
-                  <q-icon
-                    :name="isPwd ? 'visibility_off' : 'visibility'"
-                    class="cursor-pointer"
-                    @click="IsPwd = !IsPwd"
-                  />
-                </template>
-              </q-input>
-              </div>
-              <div class="col-12 col-sm-6 ">
-                <q-input v-model="NewUser.confirmPassword" outlined standout="bg-blue text-white" dense :type="IsPwd ? 'password' : 'text'" label="Confirme a senha">
+                <q-input v-model="NewUser.password" outlined standout="bg-blue text-white" dense
+                         :type="IsPwd ? 'password' : 'text'" label="Senha">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="lock"/>
+                  </template>
                   <template v-slot:append>
                     <q-icon
-                      :name="isPwd ? 'visibility_off' : 'visibility'"
-                      class="cursor-pointer"
+                      :name="IsPwd ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer text-light-blue-9"
+                      @click="IsPwd = !IsPwd"
+                    />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-sm-6 ">
+                <q-input v-model="NewUser.confirmPassword"
+                         :rules="[val => validadePassword(val) || 'As senhas informadas não conferem.']" no-error-icon
+                         hide-bottom-space outlined standout="bg-blue text-white" dense
+                         :type="IsPwd ? 'password' : 'text'" label="Confirme a senha">
+                  <template v-slot:prepend>
+                    <q-icon class="text-light-blue-9" name="lock"/>
+                  </template>
+                  <template v-slot:append>
+                    <q-icon
+                      :name="IsPwd ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer text-light-blue-9"
                       @click="IsPwd = !IsPwd"
                     />
                   </template>
@@ -124,9 +183,31 @@ export default {
         username: null,
         password: null
       },
-      NewUser:{
-
-      }
+      NewUser: {
+        nome: null,
+        nomeSocial: null,
+        sexo: null,
+        cpf: null,
+        dtNasc: null,
+        cel: null,
+        email: null,
+        confirmEmail: null,
+        password: null,
+        confirmPassword: null
+      },
+      options: [{
+        label: "Masculino",
+        value: "1"
+      },
+        {
+          label: "Feminino",
+          value: "2"
+        },
+        {
+          label: "Não Informado",
+          value: "5"
+        }
+      ],
     };
   },
   created() {
@@ -139,6 +220,12 @@ export default {
     }
   },
   methods: {
+    validadeEmail(val) {
+      return val === this.NewUser.email ? true : false
+    },
+    validadePassword(val) {
+      return val === this.NewUser.password ? true : false
+    },
     async login() {
       try {
         this.Loading = true;
