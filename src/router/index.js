@@ -17,7 +17,7 @@ export default function (/* { store, ssrContext } */) {
   })
 
 
-  Router.beforeEach((to, from, next) => {
+  /*Router.beforeEach((to, from, next) => {
     (async () => {
       try {
         const {data} = await Vue.prototype.$axios.get("/login/isAuthenticated")
@@ -31,8 +31,7 @@ export default function (/* { store, ssrContext } */) {
         console.log(e)
       }
     })()
-
-  })
+  })*/
 
   return Router
 }
