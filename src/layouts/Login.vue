@@ -6,7 +6,7 @@
           <form @submit.prevent="login">
             <div class="row">
               <div class="col-12 flex flex-center">
-                <img alt="logo" src="../assets/logo.jpg"/>
+                <img alt="logo" src="../assets/hd.svg" width="60%" class="light-blue-9"/>
               </div>
               <div class="col-12 q-ma-xs">
                 <q-input :rules="[ val => val && val.length > 0 || 'Informe o CPF ou E-mail']" no-error-icon dense
@@ -48,7 +48,7 @@
       <q-card class="shadow-7 card-style-2">
         <div class="text-light-blue-9 text-h5 flex justify-center">Preencha os dados e realize o seu cadastro.</div>
         <q-card-section>
-          <form @submit.prevent="">
+          <form>
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-sm-6">
                 <q-input v-model="NewUser.nome" :rules="[ val => val && val.length > 0 || 'Informe seu nome.']"
@@ -67,7 +67,8 @@
                 </q-input>
               </div>
               <div class="col-12 col-sm-3 ">
-                <q-select v-model="NewUser.sexo" :rules="[ val => val && val.length > 0 || 'Informe seu sexo.']"
+                <q-select v-model="NewUser.sexo"
+                          :rules="[ val => val.value && val.value.length > 0 || 'Informe seu sexo.']"
                           no-error-icon hide-bottom-space outlined standout="bg-blue text-white" dense label="Sexo"
                           :options="options"/>
               </div>
@@ -79,11 +80,8 @@
               <div class="col-12 col-sm-3 ">
                 <q-input v-model="NewUser.dtNasc"
                          :rules="[ val => val && val.length > 0 || 'Informe sua data de nascimento.']" no-error-icon
-                         hide-bottom-space label="Dt. Nasc." type="text" mask="##/##/####" outlined
+                         hide-bottom-space label="Dt. Nasc." type="date" mask="##/##/####" outlined stack-label
                          standout="bg-blue text-white" dense>
-                  <template v-slot:prepend>
-                    <q-icon class="text-light-blue-9" name="event"/>
-                  </template>
                 </q-input>
               </div>
               <div class="col-12 col-sm-3 ">
@@ -151,7 +149,7 @@
 
         <q-card-actions class="justify-between">
           <q-btn flat color="primary" icon="arrow_back" @click="FirstAccess = false"/>
-          <q-btn label="Cadastrar" color="primary"/>
+          <q-btn label="Cadastrar" color="primary" @click="newPatient()"/>
         </q-card-actions>
       </q-card>
     </template>
@@ -216,15 +214,14 @@ export default {
   computed: {
     disable() {
       return !this.Paciente.username || !this.Paciente.password;
-
-    }
+    },
   },
   methods: {
     validadeEmail(val) {
-      return val === this.NewUser.email ? true : false
+      return val === this.NewUser.email
     },
     validadePassword(val) {
-      return val === this.NewUser.password ? true : false
+      return val === this.NewUser.password
     },
     async login() {
       try {
@@ -248,6 +245,17 @@ export default {
           "ERRO: Usuário ou senha incorretos"
         );
         this.Loading = false;
+      }
+    },
+    async newPatient() {
+      try {
+        const {data} = await this.$axios.post("/agendamentoOnline/cadastro/paciente", {...this.NewUser});
+      } catch (error) {
+        this.OpenAlertDialog(
+          "bottom",
+          "bg-red text-white",
+          "ERRO: Erro ao cadastrar usuário"
+        );
       }
     },
     OpenAlertDialog(position, bgclass, message) {

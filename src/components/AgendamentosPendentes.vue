@@ -5,8 +5,8 @@
       <legend style="padding-left: 5px; padding-right: 10px; color: #0d47a1">Legenda</legend>
       <div style="text-align: center">
         <q-badge color="grey-4">
-          <q-icon name="check_box" color="green" size="1.3rem"/>
-          <span class="text-black">Selecionar</span>
+          <q-icon name="thumb_up_off_alt" color="green" size="1.3rem"/>
+          <span class="text-black">Confirmar</span>
         </q-badge>
         <q-badge color="grey-4" class="q-ml-sm">
           <q-icon name="event_busy" color="red" size="1.3rem"/>
@@ -19,7 +19,7 @@
       </div>
     </fieldset>
 
-    <div class="row">
+    <div class="row q-pa-sm q-col-gutter-sm">
       <div v-if="PendingAppointments.length === 0" class="col align-center">
         <q-banner dense class="bg-grey-3">
           <template v-slot:avatar>
@@ -29,7 +29,8 @@
           <q-btn dense flat color="primary" label="Aqui!" to="/agendar"/>
         </q-banner>
       </div>
-      <div v-else class="col-auto q-ma-xs" v-for="appointment in PendingAppointments" :key="appointment.idAgendamento">
+      <div v-else class="col-12 col-md-3 col-sm-6" v-for="appointment in PendingAppointments"
+           :key="appointment.idAgendamento">
         <q-card class="my-card shadow-2 q-mb-xs" bordered>
           <q-card-section horizontal>
             <q-card-section vertical>
@@ -66,8 +67,13 @@
             <q-separator vertical/>
 
             <q-card-actions vertical class="justify-around">
-              <q-checkbox v-model="AppointmentsSelecteds" :val="appointment" color="green"/>
-              <q-btn flat round color="red" icon="event_busy" @click="OpenDialogCancelAppointment(appointment)">
+              <q-btn flat round color="green" icon="thumb_up_off_alt"
+                     @click="AbrirDlgConfirmarAgendamento(appointment)">
+                <q-tooltip anchor="center left" self="center right" :offset="[10, 10]">
+                  <strong>Confirmar Agendamento</strong>
+                </q-tooltip>
+              </q-btn>
+              <q-btn flat round color="red" icon="event_busy" @click="AbrirDlgCancelamentoAgendamento(appointment)">
                 <q-tooltip anchor="center left" self="center right" :offset="[10, 10]">
                   <strong>Cancelar o agendamento</strong>
                 </q-tooltip>
@@ -87,9 +93,9 @@
     <q-dialog v-model="Show" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <span class="q-ml-sm">Tem certeza que deseja cancelar o agendamento do dia<b>{{
+          <span class="q-ml-sm">Tem certeza que deseja cancelar o agendamento do dia <b>{{
               AppointmentSelectedForCancel.dtAgendamento
-            }}</b>as <b>{{ AppointmentSelectedForCancel.hrAgendamento }}</b> ?
+            }}</b> as <b>{{ AppointmentSelectedForCancel.hrAgendamento }}</b> ?
           </span>
         </q-card-section>
         <div class="q-mx-lg">
@@ -105,7 +111,7 @@
 
     <!-- Dialogo de transferencia do agendamento -->
     <q-dialog v-model="ShowDlgTranferencia" persistent>
-      <q-card style="width: 100%">
+      <q-card style="min-width: 90vw">
         <q-card-section class="row items-center">
           <SelecionarHorarioAgendamento :transferencia="true"/>
         </q-card-section>
@@ -122,11 +128,18 @@
       :Position="Position"
       :BgClass="BgClass"
       :Message="Message"/>
+
+    <q-inner-loading :showing="ActiveLoading">
+      <q-spinner-facebook size="85px" color="primary"/>
+    </q-inner-loading>
   </div>
 
 </template>
 
 <script>
+import {Dialog} from 'quasar'
+
+
 export default {
   name: "PedingAppointments",
   components: {
@@ -160,6 +173,9 @@ export default {
     },
     DisableButton() {
       return !this.SelectedReason;
+    },
+    ActiveLoading() {
+      return this.$store.state.appointments.loading;
     }
   },
   watch: {
@@ -206,7 +222,10 @@ export default {
       const idAgendamentoOrigem = this.idAgendamentoTranferencia
       const idAgendamentoDestino = this.$store.getters['agendar/BuscarIdAgendamentoSelecionado']
       try {
-        await this.$axios.post("/agendamentoOnline/agendamentos/transferir", {idAgendamentoOrigem, idAgendamentoDestino});
+        await this.$axios.post("/agendamentoOnline/agendamentos/transferir", {
+          idAgendamentoOrigem,
+          idAgendamentoDestino
+        });
         this.OpenAlertDialog(
           "bottom",
           "bg-green text-white",
@@ -223,7 +242,38 @@ export default {
         );
       }
     },
-    OpenDialogCancelAppointment(appointment) {
+    AbrirDlgConfirmarAgendamento(appointment) {
+      Dialog.create({
+        message: `Deseja confirmar presença no agendamento do dia <b>${appointment.dtAgendamento}</b> as <b>${appointment.hrAgendamento}</b> ?`,
+        html: true,
+        cancel: {
+          label: 'Voltar',
+          flat: true
+        },
+        ok: {
+          label: 'Confirmar',
+          color: 'primary'
+        },
+      }).onOk(async () => {
+        try {
+          await this.$axios.post(`/agendamentoOnline/agendamentos/confirmar/${appointment.idAgendamento}`)
+          this.OpenAlertDialog(
+            "bottom",
+            "bg-green text-white",
+            "Agendamento confirmado com sucesso!"
+          );
+          await this.FindAllAppointments();
+        } catch (e) {
+          this.OpenAlertDialog(
+            "bottom",
+            "bg-red text-white",
+            "Erro ao confirmar agendamento, tente novamente!"
+          );
+          console.log(e)
+        }
+      })
+    },
+    AbrirDlgCancelamentoAgendamento(appointment) {
       this.AppointmentSelectedForCancel = appointment;
       this.Show = true;
       this.FindAllReasons();

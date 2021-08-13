@@ -19,7 +19,7 @@ module.exports = function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
     boot: [
-      
+
       'axios',
     ],
 
@@ -99,7 +99,7 @@ cfg.module.rules.push({
       // directives: [],
 
       // Quasar plugins
-      plugins: ['AppFullscreen','AddressbarColor']
+      plugins: ['AppFullscreen','AddressbarColor', 'Dialog']
     },
 
     // animations: 'all', // --- includes all animations

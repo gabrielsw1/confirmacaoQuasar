@@ -13,9 +13,12 @@
         <template v-slot:append>
           <q-icon name="event" class="cursor-pointer" color="light-blue-9">
             <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-              <q-date landscape v-model="DataSelecionada" color="light-blue-9" :events="Options"
+              <q-date v-model="DataSelecionada" color="light-blue-9" :events="Options" minimal
                       :subtitle="DataSelecionada ? `Primeiro dia disponível:  ${Options[0].split('/').reverse().join('/')}` : null"
-                      :options="Options" mask="DD/MM/YYYY" v-close-popup>
+                      :options="Options" mask="DD/MM/YYYY">
+                <div class="row items-center justify-end q-gutter-sm">
+                  <q-btn label="Fechar" color="primary" flat v-close-popup  />
+                </div>
               </q-date>
             </q-popup-proxy>
           </q-icon>
@@ -25,7 +28,7 @@
     <div :class="transferencia ? 'q-gutter-sm col-auto col-sm-12' : 'q-gutter-sm col-auto col-sm-9'"
          v-if="HorarioConfirmado">
       <q-card class="shadow-3">
-        <q-card-section class="bg-light-blue-9">
+        <q-card-section class="bg-light-blue-9 q-pa-sm">
           <div class="text-h6 text-white">Informações do Agendamento</div>
         </q-card-section>
         <q-separator/>
@@ -57,12 +60,8 @@
                        v-model="HorarioConfirmado.logradouro"/>
             </div>
             <div class="col-12 col-sm-4">
-              <q-input readonly outlined standout="bg-blue text-white" dense label="Bairro"
-                       v-model="HorarioConfirmado.bairro"/>
-            </div>
-            <div class="col-12 col-sm-4">
-              <q-input readonly outlined standout="bg-blue text-white" dense label="Cidade"
-                       v-model="HorarioConfirmado.cidade"/>
+              <q-input readonly outlined standout="bg-blue text-white" dense label="Bairro/Cidade"
+                       v-model="BairroCidade"/>
             </div>
             <div class="col-12 col-sm-12">
               <q-input readonly outlined dense label="Orientações" type="textarea"
@@ -142,6 +141,11 @@ export default {
     this.$store.commit('agendar/AlterarHorarioSelecionado', null)
     this.Filtro = this.$store.getters['agendar/BuscarFiltrosAgendarHorarios']
     this.BuscarDatasAgendas(this.Filtro.tipoItemAgendamento, this.Filtro.idItemAgendamento, this.Filtro.idConvenio, this.Filtro.idMedico)
+  },
+  computed: {
+    BairroCidade() {
+      return `${this.HorarioConfirmado.bairro} - ${this.HorarioConfirmado.cidade} `
+    }
   },
   watch: {
     HorarioConfirmado(val) {

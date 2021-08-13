@@ -11,7 +11,7 @@ const routes = [{
       },
       {
         path: '/Confirmar',
-        component: () => import('components/StepperConfirmacaoAgendamentos.vue')
+        component: () => import('components/AgendamentosPendentes.vue')
       },
       {
         path: '/Agendar',
